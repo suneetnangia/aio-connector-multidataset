@@ -2,7 +2,7 @@
 
 This repo provides the DSS messaging protocol connector for Azure IoT Operations (AIO) product. The protocol is often used on both general public vehicles or armoured vehicles in sensitive settings, for a real-time messaging.
 
-The repo makes use of Akri framework and AIO SDKs for building the connector which is well integrated with AIO's ecosystem of services e.g. asset model.
+The repo makes use of AKRI (A Kubernetes Resource Interface) framework and AIO SDKs for building the connector which is well integrated with AIO's ecosystem of services e.g. asset model.
 
 ## DDS Key Points
 

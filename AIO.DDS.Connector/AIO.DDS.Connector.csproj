@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>    
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Iot.Operations.Connector" Version="0.9.0" />
+    <PackageReference Include="Azure.Iot.Operations.Mqtt" Version="0.9.0" />
+    <PackageReference Include="Azure.Iot.Operations.Services" Version="0.9.0" />
+    <PackageReference Include="OpenDDSharp" Version="3.250.2" />
+    <PackageReference Include="OpenDDSharp.IdlGenerator" Version="3.250.2" />
+    <PackageReference Include="OpenDDSharp.Native" Version="3.250.2" />
+  </ItemGroup>
+
+</Project>
