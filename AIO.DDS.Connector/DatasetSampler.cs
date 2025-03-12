@@ -22,7 +22,8 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
         try
         {
             var currentAmbientTemperatureDataPoint = dataset.DataPointsDictionary!["currentAmbientTemperature"];
-            var httpServerCurrentAmbientTemperatureHttpMethod = HttpMethod.Parse(currentAmbientTemperatureDataPoint.DataPointConfiguration!.RootElement.GetProperty("HttpRequestMethod").GetString());
+            
+            // var httpServerCurrentAmbientTemperatureHttpMethod = HttpMethod.Parse(currentAmbientTemperatureDataPoint.DataPointConfiguration!.RootElement.GetProperty("HttpRequestMethod").GetString());
             var httpServerCurrentAmbientTemperatureRequestPath = currentAmbientTemperatureDataPoint.DataSource!;
 
             if (_credentials != null)

@@ -19,7 +19,7 @@ asset_configuration_json=$(jq -n --arg location "$LOCATION" --arg extendedLocati
             "dataPoints": [
             {
                 "dataSource": "/ambient",
-                "name": "ambientTemperature",
+                "name": "currentAmbientTemperature",
                 "dataPointConfiguration": "{}",
             }]
         }]

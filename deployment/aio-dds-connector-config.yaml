@@ -7,8 +7,7 @@ metadata:
   namespace: azure-iot-operations
 spec:
   replicas: 1
-  assetEndpointProfileType: device-001
+  assetEndpointProfileType: device-type-001
   # The image to use for the connector application.
   image: suneetnangia/aio-dds-connector:latest
   imagePullPolicy: Always
-  
