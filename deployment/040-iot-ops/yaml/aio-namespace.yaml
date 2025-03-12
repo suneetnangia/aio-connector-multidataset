@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${TF_AIO_NAMESPACE}
+  labels:
+    ca-bundle/inject: enabled

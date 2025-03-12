@@ -1,0 +1,8 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ${TF_AIO_ISSUER_KIND}
+metadata:
+  name: ${TF_AIO_ISSUER_NAME}
+spec:
+  ca:
+    secretName: secret-sync-custom-ca-cert
