@@ -33,6 +33,59 @@ module Messenger {
 1. Does the server make use of DCPS for messaging?
 2. Does the server makes use of OMG Interface Definition Language (IDL) for messaging?
 
+## Dev Loop
+
+Follow these steps to deploy this solution:
+
+1. Clone repo locally and move to the solution directory
+
+    `git clone git@github.com:suneetnangia/aio-dds-connector.git && cd aio-dds-connector`
+
+2. Set the environment variables:
+
+    ```sh
+    export DOCKER_IMAGE_TAG="<e.g. suneetnangia/aio-dds-connector:v0.1>"
+    export ARM_LOCATION="<e.g. eastus2>"
+    export ARM_SUBSCRIPTION_ID="<e.g. 6fe459a5-48ef-46ec-a521-1d9da467ab54>"
+    export ARM_RESOURCE_GROUP="<e.g. rg-sungia001-spike-001>"
+    export ARM_CUSTOM_LOCATION="<e.g. arc-sungia001-spike-001-cl>"
+    ```
+
+2. Build and push connector's container image
+
+    `make`
+
+3. Deploy AIO in Azure
+
+    1. We use Terraform scripts to deploy AIO and its dependencies in Azure
+
+        `deployment/operate-all-terraform.sh`
+
+    2. Create a `terraform.tfvars` file with at least the following minimum configuration settings:
+
+        ```hcl
+        # Required, environment hosting resource: "dev", "prod", "test", etc...
+        environment     = "<environment>"
+        # Required, short unique alphanumeric string: "sample123", "plantwa", "uniquestring", etc...
+        resource_prefix = "<resource-prefix>"
+        # Required, region location: "eastus2", "westus3", etc...
+        location        = "<location>"
+        # Optional, instance/replica number: "001", "002", etc...
+        instance        = "<instance>"
+        ```
+
+        `./deployment/operate-all-terraform.sh --start-layer 000-subscription --end-layer 040-iot-ops`
+
+4. Deploy connector to AIO environment
+
+    1. Create a local connection to your AIO deployment in Azure
+
+        `az connectedk8s proxy -n <Arc Connected Cluster Above> -g $ARM_RESOURCE_GROUP`
+
+    2. Deploy Connector
+
+        `make deploy`
+
 ## References
 
 1. [Open DDS](https://opendds.readthedocs.io/)

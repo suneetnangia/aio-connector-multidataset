@@ -1,4 +1,4 @@
-asset_endpoint_profile_configuration_json=$(jq -n --arg location "$LOCATION" --arg extendedLocation "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/microsoft.extendedlocation/customlocations/$CUSTOM_LOCATION" '{
+asset_endpoint_profile_configuration_json=$(jq -n --arg location "$LOCATION" --arg extendedLocation "/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$ARM_RESOURCE_GROUP/providers/microsoft.extendedlocation/customlocations/$ARM_CUSTOM_LOCATION" '{
     "location": $location,
     "extendedLocation": {
         "type": "CustomLocation",
@@ -21,5 +21,5 @@ asset_endpoint_profile_configuration_json=$(jq -n --arg location "$LOCATION" --a
 
 az rest --method put \
     --headers "Content-Type=application/json" \
-    --url https://management.azure.com/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.DeviceRegistry/assetEndpointProfiles/device-001?api-version=2024-11-01 \
+    --url https://management.azure.com/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$ARM_RESOURCE_GROUP/providers/Microsoft.DeviceRegistry/assetEndpointProfiles/device-001?api-version=2024-11-01 \
     --body "$asset_endpoint_profile_configuration_json"
