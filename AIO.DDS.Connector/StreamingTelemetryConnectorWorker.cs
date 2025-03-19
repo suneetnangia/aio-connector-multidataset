@@ -9,7 +9,7 @@ namespace Azure.Iot.Operations.Connector
 {
     public class StreamingTelemetryConnectorWorker : TelemetryConnectorWorker
     {
-        private readonly Dictionary<string, Dictionary<string, Timer>> _assetsSamplingTimers = new();
+        private readonly Dictionary<string, Dictionary<string, (Task, CancellationTokenSource)>> _assetsSamplingTasks = new();
         private readonly IDatasetSamplerFactory _datasetSamplerFactory;
 
         public StreamingTelemetryConnectorWorker(ApplicationContext applicationContext, ILogger<StreamingTelemetryConnectorWorker> logger, IMqttClient mqttClient, IDatasetSamplerFactory datasetSamplerFactory, IMessageSchemaProvider messageSchemaFactory, IAssetMonitor assetMonitor) : base(applicationContext, logger, mqttClient, messageSchemaFactory, assetMonitor)
@@ -21,82 +21,82 @@ namespace Azure.Iot.Operations.Connector
 
         public void OnAssetNotSampleableAsync(object? sender, AssetUnavailableEventArgs args)
         {
-            if (_assetsSamplingTimers.Remove(args.AssetName, out Dictionary<string, Timer>? datasetTimers) && datasetTimers != null)
+            if (_assetsSamplingTasks.Remove(args.AssetName, out Dictionary<string, (Task, CancellationTokenSource)>? datasetTimers) && datasetTimers != null)
             {
                 foreach (string datasetName in datasetTimers.Keys)
                 {
-                    Timer timer = datasetTimers[datasetName];
+                    Task task = datasetTimers[datasetName].Item1;
+                    datasetTimers[datasetName].Item2.Cancel();
+
                     _logger.LogInformation("Dataset with name {0} in asset with name {1} will no longer be periodically sampled", datasetName, args.AssetName);
-                    timer.Dispose();
+                    task.GetAwaiter().GetResult();
+                    _logger.LogInformation("Dataset with name {0} in asset with name {1} is completed", datasetName, args.AssetName);
                 }
             }
         }
 
         public void OnAssetSampleableAsync(object? sender, AssetAvailabileEventArgs args)
         {
-
+            try
+            {
             _logger.LogInformation("Asset with name {0} is now available for sampling", args.AssetName);
 
             if (args.Asset.Datasets == null)
             {
+                 _logger.LogWarning("Asset with name {0} does not have any datasets, cancelling sampling.", args.AssetName);
                 return;
             }
-            
-            _assetsSamplingTimers[args.AssetName] = new Dictionary<string, Timer>();
+
+            // Check if the asset is already being sampled, drain the sampling tasks if it is.
+            if (_assetsSamplingTasks.ContainsKey(args.AssetName))
+            {
+                _logger.LogInformation("Asset with name {0} is already being sampled, draining the existing sampling tasks before updating config...", args.AssetName);
+                foreach (var datasetName in _assetsSamplingTasks[args.AssetName].Keys)
+                {
+                    var task = _assetsSamplingTasks[args.AssetName][datasetName].Item1;
+                    var cancellationTokenSource = _assetsSamplingTasks[args.AssetName][datasetName].Item2;
+                    cancellationTokenSource.Cancel();
+                    task.GetAwaiter().GetResult();
+                }
+                _assetsSamplingTasks.Remove(args.AssetName);
+            }
+
+            _assetsSamplingTasks[args.AssetName] = new Dictionary<string, (Task, CancellationTokenSource)>();
 
             foreach (Dataset dataset in args.Asset.Datasets)
             {
                 IDatasetSampler datasetSampler = _datasetSamplerFactory.CreateDatasetSampler(AssetEndpointProfile!, args.Asset, dataset);
+                _logger.LogInformation("Dataset with name {0} in asset with name {1} will be sampled", dataset.Name, args.AssetName);
 
-                TimeSpan samplingInterval;
-                if (dataset.DatasetConfiguration != null
-                    && dataset.DatasetConfiguration.RootElement.TryGetProperty("samplingInterval", out JsonElement datasetSpecificSamplingInterval)
-                    && datasetSpecificSamplingInterval.TryGetInt32(out int datasetSpecificSamplingIntervalMilliseconds))
-                {
-                    samplingInterval = TimeSpan.FromMilliseconds(datasetSpecificSamplingIntervalMilliseconds);
-                }
-                else if (args.Asset.DefaultDatasetsConfiguration != null
-                    && args.Asset.DefaultDatasetsConfiguration.RootElement.TryGetProperty("samplingInterval", out JsonElement defaultDatasetSamplingInterval)
-                    && defaultDatasetSamplingInterval.TryGetInt32(out int defaultSamplingIntervalMilliseconds))
-                {
-                    samplingInterval = TimeSpan.FromMilliseconds(defaultSamplingIntervalMilliseconds);
-                }
-                else
-                {
-                    _logger.LogError($"Dataset with name {dataset.Name} in Asset with name {args.AssetName} has no configured sampling interval. This dataset will not be sampled.");
-                    return;
-                }
-
-                _logger.LogInformation("Dataset with name {0} in asset with name {1} will be sampled once every {2} milliseconds", dataset.Name, args.AssetName, samplingInterval.TotalMilliseconds);
-
-                // Create a timer that will start a long running timer for continuous sampling by data sampler.
-                // TODO: revisit this to remove timer construct as that's not being used for sampling 
-                // and it results is multiple data samplers being created when asset is updated, resulting in duplicate sample data being ingested.
-                _assetsSamplingTimers[args.AssetName][dataset.Name] = new Timer(async (state) =>
+                // Create a timer that will start a long running timer for continuous sampling by data sampler.                
+                var cancellationTokenSource = new CancellationTokenSource();
+                var cancellationToken = cancellationTokenSource.Token;
+                
+                _assetsSamplingTasks[args.AssetName][dataset.Name] = (
+                Task.Run(async () =>
                 {
                     try
-                    {                        
-                        byte[] sampledData = await datasetSampler.SampleDatasetAsync(dataset);
+                    {
+                        // Cancellation token is passed to the task to allow for cancellation of the long running task.
+                        byte[] sampledData = await datasetSampler.SampleDatasetAsync(dataset, cancellationToken);
                         await ForwardSampledDatasetAsync(args.Asset, dataset, sampledData);
                     }
                     catch (Exception e)
                     {
                         _logger.LogError(e, "Failed to sample the dataset");
                     }
-                }, null, TimeSpan.FromSeconds(0), Timeout.InfiniteTimeSpan);
+                }), cancellationTokenSource);
+            }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to sample the asset");
             }
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            foreach (var assetName in _assetsSamplingTimers.Keys)
-            {
-                foreach (var datasetName in _assetsSamplingTimers[assetName].Keys)
-                {
-                    _assetsSamplingTimers[assetName][datasetName].Dispose();
-                }
-            }
         }
     }
 }

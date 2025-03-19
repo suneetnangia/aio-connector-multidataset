@@ -18,9 +18,9 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
     public DatasetSampler(ILogger<DatasetSampler> logger, string assetName, AssetEndpointProfileCredentials? credentials)
     {
-        logger.LogInformation("Instantiating Data Sampler Instance {0}", this.GetHashCode());
-
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        logger.LogInformation("Instantiating Data Sampler Instance {0}", this.GetHashCode());
+        
         _assetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
         _credentials = credentials;
         
@@ -42,7 +42,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             "10");
     }
 
-    public async Task<byte[]> SampleDatasetAsync(Dataset dataset, CancellationToken cancellationToken)
+    public async Task<byte[]> SampleDatasetAsync(Dataset dataset, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -72,7 +72,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             AmbientTemperature.MessageDataReader messageReader = new(reader);
 
             List<AmbientTemperature.Message> receivedData = new();
-            while (true)
+            while (cancellationToken.IsCancellationRequested == false)
             {
                 _logger.LogInformation("Waiting for data on Data Sampler Instance {0}", this.GetHashCode());
                 var mask = messageReader.StatusChanges;
