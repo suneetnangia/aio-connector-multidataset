@@ -1,0 +1,87 @@
+﻿using AmbientTemperature;
+using OpenDDSharp;
+using OpenDDSharp.DDS;
+using OpenDDSharp.OpenDDS.DCPS;
+using System;
+
+namespace HelloWorldPublisher
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Ace.Init();
+
+            // , "-DCPSDebugLevel", "10", "-ORBLogFile", "LogFile.log", "-ORBDebugLevel", "10"
+            var dpf = ParticipantService.Instance.GetDomainParticipantFactory("-DCPSConfigFile", "rtps.ini");
+            var participant = dpf.CreateParticipant(42);
+            if (participant == null)
+            {
+                throw new Exception("Could not create the participant");
+            }
+
+            MessageTypeSupport support = new();
+            ReturnCode result = support.RegisterType(participant, support.GetTypeName());
+            if (result != ReturnCode.Ok)
+            {
+                throw new Exception("Could not register type: " + result.ToString());
+            }
+
+            var test = support.GetTypeName();
+            var topic = participant.CreateTopic("ambientTemperature", support.GetTypeName());
+            if (topic == null)
+            {
+                throw new Exception("Could not create the message topic");
+            }
+
+            var publisher = participant.CreatePublisher();
+            if (publisher == null)
+            {
+                throw new Exception("Could not create the publisher");
+            }
+
+            var writer = publisher.CreateDataWriter(topic);
+            if (writer == null)
+            {
+                throw new Exception("Could not create the data writer");
+            }
+            MessageDataWriter messageWriter = new(writer);
+
+            Console.WriteLine("Waiting for a subscriber...");
+            PublicationMatchedStatus status = new();
+            do
+            {
+                _ = messageWriter.GetPublicationMatchedStatus(ref status);
+                Thread.Sleep(500);
+            }
+            while (status.CurrentCount < 1);
+
+            Console.WriteLine("Subscriber found, writing data...");
+
+            while (status.CurrentCount > 0)
+            {
+                var random = new Random();
+                var temperature = random.NextDouble() * (25 - 12) + 12;
+                var content = "{\"temperature\": " + Math.Round(temperature, 1) + ", \"unit\": \"Celsius\", \"timestamp\": \"" + DateTime.UtcNow.ToString("o") + "\"}";
+
+                messageWriter.Write(new Message
+                {
+                    Content = content
+                });
+
+                Thread.Sleep(1000);
+                Console.WriteLine("Message Published: " + content);
+            }
+
+
+            Console.WriteLine("Press a key to exit...");
+            Console.Read();
+
+            participant.DeleteContainedEntities();
+            dpf.DeleteParticipant(participant);
+            ParticipantService.Instance.Shutdown();
+
+            Ace.Fini();
+        }
+    }
+}

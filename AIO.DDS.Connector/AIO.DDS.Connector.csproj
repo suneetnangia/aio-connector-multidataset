@@ -16,4 +16,14 @@
     <PackageReference Include="OpenDDSharp.Native" Version="3.250.2" />
   </ItemGroup>
 
+    <ItemGroup>
+    <None Update="rtps.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>  
+  </ItemGroup>
+
+  <ItemGroup>
+      <ProjectReference Include="../AIO.DDS.Messaging/ThermodynamicsMessage.csproj" />
+  </ItemGroup>
+
 </Project>

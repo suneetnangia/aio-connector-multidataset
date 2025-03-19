@@ -3,14 +3,16 @@ namespace AIO.DDS.Connector;
 using Azure.Iot.Operations.Connector;
 using Azure.Iot.Operations.Services.Assets;
 
-
 public class DatasetSamplerFactory : IDatasetSamplerFactory
 {
-    public static Func<IServiceProvider, IDatasetSamplerFactory> RestDatasetSourceFactoryProvider = service =>
+    private static ILogger<DatasetSampler>? _logger;
+
+    public static Func<IServiceProvider, IDatasetSamplerFactory> DatasetSourceFactoryProvider = service =>
     {
+        _logger = service.GetRequiredService<ILogger<DatasetSampler>>();
         return new DatasetSamplerFactory();
     };
-
+    
     /// <summary>
     /// Creates a dataset sampler for the given dataset.
     /// </summary>
@@ -20,11 +22,15 @@ public class DatasetSamplerFactory : IDatasetSamplerFactory
     /// <returns>The dataset sampler for the provided dataset.</returns>
     public IDatasetSampler CreateDatasetSampler(AssetEndpointProfile assetEndpointProfile, Asset asset, Dataset dataset)
     {
+        ArgumentNullException.ThrowIfNull(_logger);
+        ArgumentNullException.ThrowIfNull(assetEndpointProfile);
+        ArgumentNullException.ThrowIfNull(asset);
+        ArgumentNullException.ThrowIfNull(dataset);
+       
+       // Make dataset name configurable
         if (dataset.Name.Equals("thermodynamics"))
-        {
-            // TODO: Create DDS client here and inject it into the DatasetSampler
-
-            return new DatasetSampler(asset.DisplayName!, assetEndpointProfile.Credentials);
+        {          
+            return new DatasetSampler(_logger, asset.DisplayName!, assetEndpointProfile.Credentials);
         }
         else
         {

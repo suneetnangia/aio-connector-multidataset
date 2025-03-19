@@ -44,7 +44,8 @@ Follow these steps to deploy this solution:
 2. Set the environment variables:
 
     ```sh
-    export DOCKER_IMAGE_TAG="<e.g. suneetnangia/aio-dds-connector:v0.1>"
+    export CONNECTOR_DOCKER_IMAGE_TAG="<e.g. suneetnangia/aio-dds-connector:v0.1>"
+    export PUBLISHER_DOCKER_IMAGE_TAG="<e.g. suneetnangia/aio-dds-publisher:v0.1>"
     export ARM_LOCATION="<e.g. eastus2>"
     export ARM_SUBSCRIPTION_ID="<e.g. 6fe459a5-48ef-46ec-a521-1d9da467ab54>"
     export ARM_RESOURCE_GROUP="<e.g. rg-sungia001-spike-001>"
@@ -92,4 +93,5 @@ Follow these steps to deploy this solution:
 2. [Atostek RustDDS](https://github.com/Atostek/RustDDS)
 3. OpenDDSSharp:
     1. [OpenDDSSharp](https://www.openddsharp.com/)
-    2. [OpenDDSSharp Example](https://objectcomputing.com/resources/publications/sett/october-2020-opendds-in-a-net-application-with-openddsharp)
+    2. [OpenDDSSharp Articles](https://www.openddsharp.com/articles/getting_started.html)
+    3. [OpenDDSSharp Example](https://objectcomputing.com/resources/publications/sett/october-2020-opendds-in-a-net-application-with-openddsharp)

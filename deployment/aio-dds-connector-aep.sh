@@ -1,4 +1,4 @@
-asset_endpoint_profile_configuration_json=$(jq -n --arg location "$LOCATION" --arg extendedLocation "/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$ARM_RESOURCE_GROUP/providers/microsoft.extendedlocation/customlocations/$ARM_CUSTOM_LOCATION" '{
+asset_endpoint_profile_configuration_json=$(jq -n --arg location "$ARM_LOCATION" --arg extendedLocation "/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$ARM_RESOURCE_GROUP/providers/microsoft.extendedlocation/customlocations/$ARM_CUSTOM_LOCATION" '{
     "location": $location,
     "extendedLocation": {
         "type": "CustomLocation",

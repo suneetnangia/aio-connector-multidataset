@@ -8,7 +8,7 @@ asset_configuration_json=$(jq -n --arg location "$ARM_LOCATION" --arg extendedLo
         "displayName": "Device 001",
         "description": "Device 001 with DDS protocol endpoint",
         "assetEndpointProfileRef": "azure-iot-operations/device-001",
-        "defaultDatasetsConfiguration": "{ \"samplingInterval\": 4000 }",
+        "defaultDatasetsConfiguration": "{ \"samplingInterval\": 1000}",
         "defaultTopic": {
             "path": "azure-iot-operations/data/device-001",
             "retain": "Keep"
@@ -18,7 +18,7 @@ asset_configuration_json=$(jq -n --arg location "$ARM_LOCATION" --arg extendedLo
             "name": "thermodynamics",
             "dataPoints": [
             {
-                "dataSource": "/ambient",
+                "dataSource": "ambientTemperature",
                 "name": "currentAmbientTemperature",
                 "dataPointConfiguration": "{}",
             }]

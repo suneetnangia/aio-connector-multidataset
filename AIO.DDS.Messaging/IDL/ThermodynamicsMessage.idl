@@ -1,0 +1,6 @@
+module AmbientTemperature {
+	@topic
+	struct Message {
+		string Content;
+	};
+};
