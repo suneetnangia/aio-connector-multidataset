@@ -9,5 +9,5 @@ spec:
   replicas: 1
   assetEndpointProfileType: device-type-001
   # The image to use for the connector application.
-  image: suneetnangia/aio-dds-connector
+  image: suneetnangia/aio-dds-connector:v0.8
   imagePullPolicy: Always

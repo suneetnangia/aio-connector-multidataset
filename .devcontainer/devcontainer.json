@@ -15,12 +15,12 @@
 		},
 		"ghcr.io/devcontainers/features/azure-cli:1": {
 			"extensions": "connectedk8s,k8s-extension,azure-iot-ops"
-		},
-		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-			"version": "latest",
-			"helm": "latest",
-			"minikube": "none"
 		}
+		// "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+		// 	"version": "latest",
+		// 	"helm": "latest",
+		// 	"minikube": "none"
+		// }
 	},
 	// Use this environment variable if you need to bind mount your local source code into a new container.
 	"remoteEnv": {

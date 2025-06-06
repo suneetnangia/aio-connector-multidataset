@@ -1,8 +1,5 @@
 namespace AIO.DDS.Connector;
 
-using OpenDDSharp;
-using OpenDDSharp.DDS;
-using OpenDDSharp.OpenDDS.DCPS;
 using Azure.Iot.Operations.Connector;
 using Azure.Iot.Operations.Services.Assets;
 using System.Text;
@@ -13,33 +10,18 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     private readonly ILogger<DatasetSampler> _logger;
     private readonly string _assetName;
     private readonly AssetEndpointProfileCredentials? _credentials;
-    private readonly DomainParticipantFactory _domainParticipantFactory;
-    // private readonly DomainParticipant _domainParticipant;
+    private readonly string? _targetAddress;
+    private readonly HttpClient _httpClient;
 
-    public DatasetSampler(ILogger<DatasetSampler> logger, string assetName, AssetEndpointProfileCredentials? credentials)
+    public DatasetSampler(ILogger<DatasetSampler> logger, string assetName, AssetEndpointProfileCredentials? credentials, string? targetAddress)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         logger.LogInformation("Instantiating Data Sampler Instance {0}", this.GetHashCode());
-        
+
         _assetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
         _credentials = credentials;
-        
-        Ace.Init();
-
-        if (!File.Exists("rtps.ini"))
-        {
-            throw new FileNotFoundException("The required configuration file 'rtps.ini' is missing.");
-        }
-
-        _domainParticipantFactory = ParticipantService.Instance.GetDomainParticipantFactory(
-            "-DCPSConfigFile",
-            "rtps.ini",
-            "-DCPSDebugLevel",
-            "10",
-            "-ORBLogFile",
-            "LogFile.log",
-            "-ORBDebugLevel",
-            "10");
+        _targetAddress = targetAddress;
+        _httpClient = new HttpClient();
     }
 
     public async Task<byte[]> SampleDatasetAsync(Dataset dataset, CancellationToken cancellationToken = default)
@@ -53,58 +35,57 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
                 throw new InvalidOperationException($"Dataset with name {dataset.Name} in asset with name {_assetName} has no data points");
             }
 
-            // Get the topic from the DataPointConfiguration for DDS.
+            // Get the data source URL from the DataPointConfiguration.
             var currentAmbientTemperatureDataPoint = dataset.DataPointsDictionary!["currentAmbientTemperature"];
-            var currentAmbientTemperatureTopic = currentAmbientTemperatureDataPoint.DataSource!;
+            var dataSourceUrl = currentAmbientTemperatureDataPoint.DataSource!;
 
-            AmbientTemperature.MessageTypeSupport support = new();
-            var domainParticipant = _domainParticipantFactory.CreateParticipant(42) ?? throw new Exception("Could not create the domain participant");
-            ReturnCode result = support.RegisterType(domainParticipant, support.GetTypeName());
-            if (result != ReturnCode.Ok)
+            _logger.LogInformation("Fetching data from HTTP endpoint: {0}", dataSourceUrl);
+
+            // Make HTTP request to fetch actual data
+            string httpData;
+            try
             {
-                throw new Exception("Could not register type: " + result.ToString());
-            }
-
-            var topic = domainParticipant.CreateTopic(currentAmbientTemperatureTopic, support.GetTypeName()) ?? throw new Exception("Could not create the message topic");
-            var subscriber = domainParticipant.CreateSubscriber() ?? throw new Exception("Could not create the subscriber");
-            var reader = subscriber.CreateDataReader(topic) ?? throw new Exception("Could not create the message data reader");
-
-            AmbientTemperature.MessageDataReader messageReader = new(reader);
-
-            List<AmbientTemperature.Message> receivedData = new();
-            while (cancellationToken.IsCancellationRequested == false)
-            {
-                _logger.LogInformation("Waiting for data on Data Sampler Instance {0}", this.GetHashCode());
-                var mask = messageReader.StatusChanges;
-                if ((mask & StatusKind.DataAvailableStatus) != 0)
+                // Use the target address from the asset endpoint profile
+                if (string.IsNullOrEmpty(_targetAddress))
                 {
-                    List<SampleInfo> receivedInfo = new();
-                    result = messageReader.Take(receivedData, receivedInfo);
-
-                    if (result == ReturnCode.Ok)
-                    {
-                        bool messageReceived = false;
-                        for (int i = 0; i < receivedData.Count; i++)
-                        {
-                            if (receivedInfo[i].ValidData)
-                            {
-                                _logger.LogInformation("Received data on Data Sampler Instance {0}: {1}", this.GetHashCode(), receivedData[i].Content);
-                            }
-                        }
-
-                        if (messageReceived)
-                            break;
-                    }
+                    throw new InvalidOperationException("Target address is not configured in the asset endpoint profile");
                 }
-
-                // Wait for a while before checking again
-                await Task.Delay(1000);
+                
+                var fullUrl = _targetAddress.TrimEnd('/') + dataSourceUrl;
+                // Configure HttpClient to ignore SSL validation
+                using var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+                };
+                using var secureHttpClient = new HttpClient(handler);
+                _logger.LogInformation("Making HTTP request to: {0}", fullUrl);
+                var response = await secureHttpClient.GetAsync(fullUrl, cancellationToken);
+                response.EnsureSuccessStatusCode();
+                httpData = await response.Content.ReadAsStringAsync(cancellationToken);
+                
+                _logger.LogInformation("Successfully fetched data from HTTP endpoint");
             }
-
-            domainParticipant.DeleteContainedEntities();
-            _domainParticipantFactory.DeleteParticipant(domainParticipant);
-
-            var jsonString = JsonSerializer.Serialize(receivedData);
+            catch (Exception httpEx)
+            {
+                _logger.LogError(httpEx, "Failed to fetch data from HTTP endpoint {0}", dataSourceUrl);
+                // Return error information instead of crashing
+                httpData = $"{{\"error\": \"Failed to fetch data from {dataSourceUrl}\", \"message\": \"{httpEx.Message}\"}}";
+            }
+            
+            // Create JSON response with the actual fetched data
+            var jsonResponse = new
+            {
+                currentAmbientTemperature = new
+                {
+                    dataSource = dataSourceUrl,
+                    data = httpData,
+                    timestamp = DateTimeOffset.UtcNow.ToString("o")
+                }
+            };
+            
+            var jsonString = JsonSerializer.Serialize(jsonResponse);
+            _logger.LogInformation("Returning sampled data: {0}", jsonString);
+            
             return Encoding.UTF8.GetBytes(jsonString);
         }
         catch (Exception ex)
@@ -116,9 +97,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         Console.WriteLine("Shutting down DDS DatasetSampler.");
-        ParticipantService.Instance.Shutdown();
-        Ace.Fini();
-
+        _httpClient?.Dispose();
         return ValueTask.CompletedTask;
     }
 }

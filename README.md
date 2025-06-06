@@ -44,12 +44,11 @@ Follow these steps to deploy this solution:
 2. Set the environment variables:
 
     ```sh
-    export CONNECTOR_DOCKER_IMAGE_TAG="<e.g. suneetnangia/aio-dds-connector:v0.1>"
-    export PUBLISHER_DOCKER_IMAGE_TAG="<e.g. suneetnangia/aio-dds-publisher:v0.1>"
-    export ARM_LOCATION="<e.g. eastus2>"
-    export ARM_SUBSCRIPTION_ID="<e.g. 6fe459a5-48ef-46ec-a521-1d9da467ab54>"
-    export ARM_RESOURCE_GROUP="<e.g. rg-sungia001-spike-001>"
-    export ARM_CUSTOM_LOCATION="<e.g. arc-sungia001-spike-001-cl>"
+    export CONNECTOR_DOCKER_IMAGE_TAG="suneetnangia/aio-dds-connector:v0.8"
+    export ARM_LOCATION="eastus2"
+    export ARM_SUBSCRIPTION_ID="6fe459a5-48ef-46ec-a521-1d9da467ab54"
+    export ARM_RESOURCE_GROUP="rg-sungia001-spike-001"
+    export ARM_CUSTOM_LOCATION="arc-sungia001-spike-001-cl"
     ```
 
 2. Build and push connector's container image

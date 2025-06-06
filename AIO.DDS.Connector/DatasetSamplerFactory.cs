@@ -27,10 +27,16 @@ public class DatasetSamplerFactory : IDatasetSamplerFactory
         ArgumentNullException.ThrowIfNull(asset);
         ArgumentNullException.ThrowIfNull(dataset);
        
-       // Make dataset name configurable
+        // Make dataset name configurable
         if (dataset.Name.Equals("thermodynamics"))
         {          
-            return new DatasetSampler(_logger, asset.DisplayName!, assetEndpointProfile.Credentials);
+            _logger.LogInformation("Creating DatasetSampler for thermodynamics dataset on asset {AssetName}", asset.DisplayName);
+            return new DatasetSampler(_logger, asset.DisplayName!, assetEndpointProfile.Credentials, assetEndpointProfile.TargetAddress);
+        }
+        else if (dataset.Name.Equals("pneumatics"))
+        {          
+            _logger.LogInformation("Creating DatasetSampler for pneumatics dataset on asset {AssetName}", asset.DisplayName);
+            return new DatasetSampler(_logger, asset.DisplayName!, assetEndpointProfile.Credentials, assetEndpointProfile.TargetAddress);
         }
         else
         {

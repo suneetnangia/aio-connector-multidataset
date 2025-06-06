@@ -46,20 +46,24 @@ namespace Azure.Iot.Operations.Connector
                  _logger.LogWarning("Asset with name {0} does not have any datasets, cancelling sampling.", args.AssetName);
                 return;
             }
+            else
+            {
+                _logger.LogInformation($"Asset with name {args.AssetName} has {args.Asset.Datasets.Count()} datasets");
+            }            
 
             // Check if the asset is already being sampled, drain the sampling tasks if it is.
-            if (_assetsSamplingTasks.ContainsKey(args.AssetName))
-            {
-                _logger.LogInformation("Asset with name {0} is already being sampled, draining the existing sampling tasks before updating config...", args.AssetName);
-                foreach (var datasetName in _assetsSamplingTasks[args.AssetName].Keys)
+                if (_assetsSamplingTasks.ContainsKey(args.AssetName))
                 {
-                    var task = _assetsSamplingTasks[args.AssetName][datasetName].Item1;
-                    var cancellationTokenSource = _assetsSamplingTasks[args.AssetName][datasetName].Item2;
-                    cancellationTokenSource.Cancel();
-                    task.GetAwaiter().GetResult();
+                    _logger.LogInformation("Asset with name {0} is already being sampled, draining the existing sampling tasks before updating config...", args.AssetName);
+                    foreach (var datasetName in _assetsSamplingTasks[args.AssetName].Keys)
+                    {
+                        var task = _assetsSamplingTasks[args.AssetName][datasetName].Item1;
+                        var cancellationTokenSource = _assetsSamplingTasks[args.AssetName][datasetName].Item2;
+                        cancellationTokenSource.Cancel();
+                        task.GetAwaiter().GetResult();
+                    }
+                    _assetsSamplingTasks.Remove(args.AssetName);
                 }
-                _assetsSamplingTasks.Remove(args.AssetName);
-            }
 
             _assetsSamplingTasks[args.AssetName] = new Dictionary<string, (Task, CancellationTokenSource)>();
 

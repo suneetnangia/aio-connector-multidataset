@@ -6,9 +6,9 @@ asset_configuration_json=$(jq -n --arg location "$ARM_LOCATION" --arg extendedLo
     },
     "properties": {
         "displayName": "Device 001",
-        "description": "Device 001 with DDS protocol endpoint",
+        "description": "Device 001 with REST protocol endpoint",
         "assetEndpointProfileRef": "azure-iot-operations/device-001",
-        "defaultDatasetsConfiguration": "{}",
+        "defaultDatasetsConfiguration": "{ \"samplingInterval\": 2000 }",
         "defaultTopic": {
             "path": "azure-iot-operations/data/device-001",
             "retain": "Keep"
@@ -18,11 +18,21 @@ asset_configuration_json=$(jq -n --arg location "$ARM_LOCATION" --arg extendedLo
             "name": "thermodynamics",
             "dataPoints": [
             {
-                "dataSource": "ambientTemperature",
+                "dataSource": "/piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases",
                 "name": "currentAmbientTemperature",
-                "dataPointConfiguration": "{}",
+                "dataPointConfiguration": "{}"
             }]
-        }]
+        },
+         {
+            "name": "pneumatics",
+            "dataPoints": [
+            {
+                "dataSource": "/piwebapi/assetdatabases/F1RDCf1onAl8tkuTYgE2NfIPFQNp0AsaE7302XMsysUw2j2gQVZFVkFQSVxERUZBVUxUVVNFUkRC/elements",
+                "name": "currentAmbientTemperature",
+                "dataPointConfiguration": "{}"
+            }]
+        }
+        ]
     }
 }')
 

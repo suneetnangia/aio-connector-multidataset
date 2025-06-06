@@ -14,7 +14,7 @@ asset_endpoint_profile_configuration_json=$(jq -n --arg location "$ARM_LOCATION"
         },
         "discoveredAssetEndpointProfileRef": "",
         "endpointProfileType": "device-type-001",
-        "targetAddress": "dds://127.0.0.1",
+        "targetAddress": "https://11.0.0.4:443",
         "uuid": "3d83f8be-9874-4f82-8538-84b7fced7f74"
     }
 }')

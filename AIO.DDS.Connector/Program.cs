@@ -11,8 +11,12 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.AddSingleton(DatasetSamplerFactory.DatasetSourceFactoryProvider);
         services.AddSingleton(NoMessageSchemaProvider.NoMessageSchemaProviderFactory);
         services.AddSingleton(AssetMonitorFactoryProvider.AssetMonitorFactory);
-        services.AddHostedService<StreamingTelemetryConnectorWorker>();
+        // services.AddSingleton(LeaderElectionConfigurationProvider.ConnectorLeaderElectionConfigurationProviderFactory);
+        services.AddHostedService<PollingTelemetryConnectorWorker>();
+        // services.AddHostedService<StreamingTelemetryConnectorWorker>();
     })
     .Build();
+
+Console.WriteLine("Starting DDS Connector...");
 
 host.Run();
