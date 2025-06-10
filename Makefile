@@ -48,7 +48,25 @@ clean_deploy:
 	sleep 5
 	kubectl delete deployment device-001-deployment -n azure-iot-operations
 
-redeploy: clean_deploy deploy	
+redeploy: clean_deploy deploy
+
+# Check Asset CRD status
+check_crd_status:
+	./deployment/scripts/check-crd-status.sh
+
+# Amend Asset CRD to allow multiple datasets
+amend_crd:
+	./deployment/scripts/amend-asset-crd-multiple-datasets.sh
+
+# Test multiple datasets functionality
+test_multiple_datasets:
+	./deployment/scripts/test-multiple-datasets.sh
+
+# Full setup: amend CRD first, then deploy
+setup: amend_crd deploy
+
+# Full workflow: setup and test
+setup_and_test: setup test_multiple_datasets	
 
 package:
 	helm package AIO.DDS.Connector/helm/http-mqtt-connector
