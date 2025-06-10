@@ -86,6 +86,64 @@ Follow these steps to deploy this solution:
 
         `make deploy`
 
+## Multiple Datasets Support
+
+The connector supports multiple datasets per asset (thermodynamics, pneumatics, etc.), but by default, the Asset CRD in Kubernetes limits assets to only 1 dataset. To enable multiple datasets:
+
+### Quick Setup
+
+```bash
+# Check current CRD status
+make check_crd_status
+
+# Amend CRD to allow multiple datasets
+make amend_crd
+
+# Test multiple datasets functionality  
+make test_multiple_datasets
+
+# Full setup (amend + deploy)
+make setup
+
+# Full workflow (setup + test)
+make setup_and_test
+```
+
+### Manual Process
+
+```bash
+# Check what needs to be changed
+./deployment/scripts/check-crd-status.sh
+
+# Amend the Asset CRD
+./deployment/scripts/amend-asset-crd-multiple-datasets.sh
+
+# Test the changes
+./deployment/scripts/test-multiple-datasets.sh
+```
+
+### Supported Dataset Types
+
+The `DatasetSamplerFactory` currently supports:
+- `thermodynamics` - Temperature and thermal data
+- `pneumatics` - Pressure and pneumatic data
+
+### Documentation
+
+For detailed information about multiple datasets support, see [Asset CRD Multiple Datasets Guide](docs/ASSET_CRD_MULTIPLE_DATASETS.md).
+
+## Available Make Targets
+
+- `make` - Build and push container image
+- `make deploy` - Deploy connector to AIO
+- `make check_crd_status` - Check Asset CRD status
+- `make amend_crd` - Amend CRD to allow multiple datasets
+- `make test_multiple_datasets` - Test multiple datasets functionality
+- `make setup` - Amend CRD and deploy
+- `make setup_and_test` - Full workflow with testing
+- `make clean_deploy` - Clean up deployment
+- `make redeploy` - Clean and redeploy
+
 ## References
 
 1. [Open DDS](https://opendds.readthedocs.io/)
