@@ -59,7 +59,7 @@ Follow these steps to deploy this solution:
 
     1. We use Terraform scripts to deploy AIO and its dependencies in Azure
 
-        `deployment/operate-all-terraform.sh`
+        `/deployment/operate-all-terraform.sh`
 
     2. Create a `terraform.tfvars` file with at least the following minimum configuration settings:
 
@@ -75,6 +75,8 @@ Follow these steps to deploy this solution:
         ```
 
         `./deployment/operate-all-terraform.sh --start-layer 000-subscription --end-layer 040-iot-ops`
+
+        > Use working directory `/deployment/` when running the script
 
 4. Deploy connector to AIO environment
 

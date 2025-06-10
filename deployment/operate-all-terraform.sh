@@ -70,11 +70,17 @@ folders=(
 )
 
 start_skipping=false
+
 if [ -n "$start_layer" ]; then
   start_skipping=true
-  print_visible "Starting terraform apply from layer $start_layer"
+  print_visible "Starting terraform apply from layer ${start_layer}"
 else
   print_visible "Starting terraform apply for the following folders: ${folders[*]}"
+fi
+
+if [ -z "$end_layer" ]; then
+  end_layer="${folders[-1]}"
+  print_visible "End layer set to the last folder: ${end_layer}"
 fi
 
 for folder in "${folders[@]}"; do
@@ -87,7 +93,7 @@ for folder in "${folders[@]}"; do
   fi
   # If the folder begins with or fully matches $end_layer, stop execution
   if [[ "$folder" == "$end_layer"* ]]; then
-    print_visible "Stopping terraform apply at layer $end_layer"
+    print_visible "Stopping terraform apply at layer ${end_layer}"
     break
   fi
 done

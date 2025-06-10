@@ -25,4 +25,5 @@ module "vm_host" {
   instance                              = var.instance
   aio_resource_group                    = data.azurerm_resource_group.aio
   arc_onboarding_user_assigned_identity = data.azurerm_user_assigned_identity.arc_onboarding
+  vm_sku_size                           = var.vm_sku_size
 }

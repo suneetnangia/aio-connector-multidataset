@@ -26,3 +26,9 @@ variable "instance" {
   description = "Instance identifier for naming resources: 001, 002, etc..."
   default     = "001"
 }
+
+variable "vm_sku_size" {
+  type        = string
+  description = "Size of the VM"
+  default     = "Standard_D8s_v3"
+}
