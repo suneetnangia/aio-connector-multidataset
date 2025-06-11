@@ -1,0 +1,15 @@
+---
+apiVersion: deviceregistry.microsoft.com/v1
+kind: AssetEndpointProfile
+metadata:
+  name: aio-dds-connector-asset-endpoint
+  namespace: azure-iot-operations
+spec:
+  authentication:
+    method: UsernamePassword
+    usernamePasswordCredentials:
+      usernameSecretName: aio-dds-connector-aep-creds/username
+      passwordSecretName: aio-dds-connector-aep-creds/password
+  endpointProfileType: device-type-001
+  targetAddress: https://11.0.0.4:443
+  uuid: 3d83f8be-9874-4f82-8538-84b7fced7f74
