@@ -25,15 +25,15 @@ endif
 all: publish_container
 
 build_container:
-	dotnet publish AIO.DDS.Connector/AIO.DDS.Connector.csproj /t:PublishContainer /p:ContainerImageTag=latest	
+	dotnet publish AIO.DDS.Connector/AIO.DDS.Connector.csproj /t:PublishContainer /p:ContainerImageTag=latest
 
 publish_container: build_container
-	docker tag aio-dds-connector:latest $(CONNECTOR_DOCKER_IMAGE_TAG)	
+	docker tag aio-dds-connector:latest $(CONNECTOR_DOCKER_IMAGE_TAG)
 	docker push $(CONNECTOR_DOCKER_IMAGE_TAG)
 
-deploy: publish_container	
+deploy: publish_container
 	kubectl apply -f deployment/aio-dds-connector-config.yaml
-	kubectl apply -f deployment/aio-dds-connector-aep-creds.yaml	
+	kubectl apply -f deployment/aio-dds-connector-aep-creds.yaml
 	./deployment/aio-dds-connector-aep.sh
 	./deployment/aio-dds-connector-asset-01.sh
 	# kubectl apply -f deployment/aio-dds-connector-asset-01.yaml
@@ -41,7 +41,7 @@ deploy: publish_container
 clean_deploy:
 	# TODO: clean up the deployment completely i.e. asset and aep resources as well.
 	kubectl delete -f deployment/aio-dds-connector-config.yaml
-	kubectl delete -f deployment/aio-dds-connector-aep-creds.yaml	
+	kubectl delete -f deployment/aio-dds-connector-aep-creds.yaml
 	kubectl delete assets device-001 -n azure-iot-operations
 	kubectl delete assetendpointprofile device-001 -n azure-iot-operations
 	kubectl scale deployment device-001-deployment --replicas 0 -n azure-iot-operations
@@ -66,13 +66,13 @@ test_multiple_datasets:
 setup: amend_crd deploy
 
 # Full workflow: setup and test
-setup_and_test: setup test_multiple_datasets	
+setup_and_test: setup test_multiple_datasets
 
 package:
 	helm package AIO.DDS.Connector/helm/http-mqtt-connector
 
 clean:
-	dotnet clean AIO.DDS.Connector/AIO.DDS.Connector.csproj		
+	dotnet clean AIO.DDS.Connector/AIO.DDS.Connector.csproj
 
 deep_clean: clean
 	dotnet nuget locals all --clear

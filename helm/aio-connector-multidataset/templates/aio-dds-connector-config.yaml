@@ -1,0 +1,13 @@
+# The Akri operator will use the connector config to deploy your connector as a Kubernetes pod when a matching AEP has been created on the cluster.
+# Documentation https://github.com/Azure/azure-iot-operations-preview/blob/main/preview/akri-connectors/docs/akri-configurations.md#connector-configuration
+apiVersion: akri.microsoft.com/v1beta1
+kind: ConnectorConfig
+metadata:
+  name: aio-dds-connector-config
+  namespace: azure-iot-operations
+spec:
+  replicas: 1
+  assetEndpointProfileType: device-type-001
+  # The image to use for the connector application
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}

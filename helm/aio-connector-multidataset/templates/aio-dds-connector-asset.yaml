@@ -1,0 +1,41 @@
+apiVersion: deviceregistry.microsoft.com/v1
+kind: Asset
+metadata:
+  name: device-001
+  namespace: azure-iot-operations
+spec:
+  displayName: Device 001
+  description: Device 001 with REST protocol endpoint.
+  assetEndpointProfileRef: azure-iot-operations/device-001 # <namespace>/<assetEndpointProfile.metadata.name>
+  defaultDatasetsConfiguration: |-
+    {
+       "samplingInterval": 2000,
+    }
+  defaultTopic:
+    path: azure-iot-operations/data/device-001
+    retain: Keep
+  datasets:
+    - name: thermodynamics
+      datasetConfiguration: |-
+        {
+           "samplingInterval": 5000,
+        }
+      dataPoints:
+        - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
+          name: currentAmbientTemperature
+          dataPointConfiguration: |-
+            {
+               "HttpRequestMethod": "GET",
+            }
+    - name: pneumatics
+      datasetConfiguration: |-
+        {
+           "samplingInterval": 1000,
+        }
+      dataPoints:
+        - dataSource: /piwebapi/assetdatabases/F1RDCf1onAl8tkuTYgE2NfIPFQNp0AsaE7302XMsysUw2j2gQVZFVkFQSVxERUZBVUxUVVNFUkRC/elements
+          name: currentAmbientTemperature
+          dataPointConfiguration: |-
+            {
+               "HttpRequestMethod": "GET",
+            }
