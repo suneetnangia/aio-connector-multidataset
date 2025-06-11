@@ -2,7 +2,7 @@
 apiVersion: deviceregistry.microsoft.com/v1
 kind: AssetEndpointProfile
 metadata:
-  name: aio-dds-connector-asset-endpoint
+  name: device-001 # Needs to match the asset name
   namespace: azure-iot-operations
 spec:
   authentication:
