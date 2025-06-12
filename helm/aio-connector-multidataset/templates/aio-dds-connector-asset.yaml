@@ -1,18 +1,20 @@
+---
 apiVersion: deviceregistry.microsoft.com/v1
 kind: Asset
 metadata:
-  name: device-001
-  namespace: azure-iot-operations
+  name: {{ .Values.asset.name | default "device-001" }}
+  namespace: {{ .Values.namespace | default "azure-iot-operations" }}
 spec:
-  displayName: Device 001
-  description: Device 001 with REST protocol endpoint.
-  assetEndpointProfileRef: azure-iot-operations/device-001 # <namespace>/<assetEndpointProfile.metadata.name>
+  displayName: {{ .Values.asset.displayName | default "Device 001" }}
+  description: {{ .Values.asset.description }}
+  # assetEndpointProfileRef is of form <namespace>/<asset name>
+  assetEndpointProfileRef: '{{ .Values.namespace | default "azure-iot-operations" }}/{{ .Values.asset.name | default "device-001" }}'
   defaultDatasetsConfiguration: |-
     {
-       "samplingInterval": 2000,
+       "samplingInterval": {{ .Values.asset.defaultDatasetsSamplingInterval | default 2000 }},
     }
   defaultTopic:
-    path: azure-iot-operations/data/device-001
+    path: '{{ .Values.namespace | default "azure-iot-operations" }}/data/{{ .Values.asset.name | default "device-001" }}'
     retain: Keep
   datasets:
     - name: thermodynamics
