@@ -6,5 +6,5 @@ metadata:
   namespace: {{ .Values.namespace | default "azure-iot-operations" }}
 type: Opaque
 data:
-  username: dXNlcjE=
-  password: dXNlcjE=
+  username: {{ randAlpha 5 | b64enc }}
+  password: {{ randAlphaNum 20 | b64enc }}
