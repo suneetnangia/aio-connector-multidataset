@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: aio-dds-connector-aep-creds
+  name: '{{ .Values.asset.name | default "device-001" }}-aio-connector-aep-creds'
   namespace: {{ .Values.namespace | default "azure-iot-operations" }}
 type: Opaque
 data:

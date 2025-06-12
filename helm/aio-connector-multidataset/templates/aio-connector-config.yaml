@@ -4,7 +4,7 @@
 apiVersion: akri.microsoft.com/v1beta1
 kind: ConnectorConfig
 metadata:
-  name: aio-dds-connector-config
+  name: '{{ .Values.asset.name | default "device-001" }}-aio-connector-config'
   namespace: {{ .Values.namespace | default "azure-iot-operations" }}
 spec:
   replicas: {{ .Values.replicas | default 1 }}
