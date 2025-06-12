@@ -16,28 +16,4 @@ spec:
   defaultTopic:
     path: '{{ .Values.namespace | default "azure-iot-operations" }}/data/{{ .Values.asset.name | default "device-001" }}'
     retain: Keep
-  datasets:
-    - name: thermodynamics
-      datasetConfiguration: |-
-        {
-           "samplingInterval": 5000,
-        }
-      dataPoints:
-        - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
-          name: currentAmbientTemperature
-          dataPointConfiguration: |-
-            {
-               "HttpRequestMethod": "GET",
-            }
-    - name: pneumatics
-      datasetConfiguration: |-
-        {
-           "samplingInterval": 1000,
-        }
-      dataPoints:
-        - dataSource: /piwebapi/assetdatabases/F1RDCf1onAl8tkuTYgE2NfIPFQNp0AsaE7302XMsysUw2j2gQVZFVkFQSVxERUZBVUxUVVNFUkRC/elements
-          name: currentAmbientTemperature
-          dataPointConfiguration: |-
-            {
-               "HttpRequestMethod": "GET",
-            }
+  {{ .Values.datasets }}
