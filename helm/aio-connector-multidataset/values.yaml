@@ -1,0 +1,28 @@
+# Default values for aio-connector-multidataset.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+---
+# This is to override the chart name
+nameOverride: ""
+fullnameOverride: ""
+
+asset:
+  name: device-001
+  displayName: Device 001
+  description: Device 001 with REST protocol endpoint
+  defaultDatasetsSamplingInterval: 2000
+assetEndpointProfile:
+  type: device-type-001
+  targetAddress: https://11.0.0.4:443
+
+replicas: 1
+
+# Container image details for the connector application
+image:
+  repository: suneetnangia/aio-dds-connector
+  pullPolicy: Always
+  tag: v0.8
+
+# This is for the secrets for pulling an image from a private repository more information can be found here:
+# https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []

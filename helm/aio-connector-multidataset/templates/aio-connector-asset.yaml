@@ -1,0 +1,19 @@
+---
+apiVersion: deviceregistry.microsoft.com/v1
+kind: Asset
+metadata:
+  name: {{ .Values.asset.name | default "device-001" }}
+  namespace: {{ default "azure-iot-operations" }}
+spec:
+  displayName: {{ .Values.asset.displayName | default "Device 001" }}
+  description: {{ .Values.asset.description }}
+  # assetEndpointProfileRef is of form <namespace>/<asset name>
+  assetEndpointProfileRef: '{{ .Values.namespace | default "azure-iot-operations" }}/{{ .Values.asset.name | default "device-001" }}'
+  defaultDatasetsConfiguration: |-
+    {
+       "samplingInterval": {{ .Values.asset.defaultDatasetsSamplingInterval | default 2000 }},
+    }
+  defaultTopic:
+    path: '{{ .Values.namespace | default "azure-iot-operations" }}/data/{{ .Values.asset.name | default "device-001" }}'
+    retain: Keep
+  {{ .Values.datasets }}

@@ -1,4 +1,4 @@
-namespace AIO.DDS.Connector;
+namespace Aio.Multidataset.Rest.Connector;
 
 using Azure.Iot.Operations.Connector;
 using Azure.Iot.Operations.Services.Assets;
