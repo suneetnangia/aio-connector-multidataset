@@ -25,7 +25,7 @@ endif
 all: publish_container
 
 build_container:
-	dotnet publish AIO.DDS.Connector/AIO.DDS.Connector.csproj /t:PublishContainer /p:ContainerImageTag=latest
+	dotnet publish Aio.Multidataset.Rest.Connector/Aio.Multidataset.Rest.Connector.csproj /t:PublishContainer /p:ContainerImageTag=latest
 
 publish_container: build_container
 	docker tag aio-dds-connector:latest $(CONNECTOR_DOCKER_IMAGE_TAG)
@@ -69,10 +69,10 @@ setup: amend_crd deploy
 setup_and_test: setup test_multiple_datasets
 
 package:
-	helm package AIO.DDS.Connector/helm/http-mqtt-connector
+	helm package Aio.Multidataset.Rest.Connector/helm/http-mqtt-connector
 
 clean:
-	dotnet clean AIO.DDS.Connector/AIO.DDS.Connector.csproj
+	dotnet clean Aio.Multidataset.Rest.Connector/Aio.Multidataset.Rest.Connector.csproj
 
 deep_clean: clean
 	dotnet nuget locals all --clear

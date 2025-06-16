@@ -1,4 +1,4 @@
-namespace AIO.DDS.Connector;
+namespace Aio.Multidataset.Rest.Connector;
 
 using Azure.Iot.Operations.Connector;
 using Azure.Iot.Operations.Services.Assets;
@@ -12,7 +12,7 @@ public class DatasetSamplerFactory : IDatasetSamplerFactory
         _logger = service.GetRequiredService<ILogger<DatasetSampler>>();
         return new DatasetSamplerFactory();
     };
-    
+
     /// <summary>
     /// Creates a dataset sampler for the given dataset.
     /// </summary>
@@ -26,15 +26,15 @@ public class DatasetSamplerFactory : IDatasetSamplerFactory
         ArgumentNullException.ThrowIfNull(assetEndpointProfile);
         ArgumentNullException.ThrowIfNull(asset);
         ArgumentNullException.ThrowIfNull(dataset);
-       
+
         // Make dataset name configurable
         if (dataset.Name.Equals("thermodynamics"))
-        {          
+        {
             _logger.LogInformation("Creating DatasetSampler for thermodynamics dataset on asset {AssetName}", asset.DisplayName);
             return new DatasetSampler(_logger, asset.DisplayName!, assetEndpointProfile.Credentials, assetEndpointProfile.TargetAddress);
         }
         else if (dataset.Name.Equals("pneumatics"))
-        {          
+        {
             _logger.LogInformation("Creating DatasetSampler for pneumatics dataset on asset {AssetName}", asset.DisplayName);
             return new DatasetSampler(_logger, asset.DisplayName!, assetEndpointProfile.Credentials, assetEndpointProfile.TargetAddress);
         }

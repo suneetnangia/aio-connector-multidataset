@@ -1,4 +1,4 @@
-﻿using AIO.DDS.Connector;
+﻿using Aio.Multidataset.Rest.Connector;
 
 using Azure.Iot.Operations.Connector;
 using Azure.Iot.Operations.Protocol;

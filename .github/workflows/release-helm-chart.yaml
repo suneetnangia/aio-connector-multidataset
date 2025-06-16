@@ -1,0 +1,34 @@
+name: Package and release Helm chart
+
+on:
+  workflow_dispatch:
+    tags: [ 'v*.*.*' ] # Publish semver tags as releases
+
+env:
+  HELM_CHART_DIR: helm
+
+jobs:
+  package-release-helm-chart:
+    name: Package and release AIO connector Helm chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Release AIO connector Helm chart
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: ${{ env.HELM_CHART_DIR }}
+          mark_as_latest: true
+          packages_with_index: true # Upload chart packages directly into publishing branch
+          # Name of the branch to be used to push the index and artifacts. (default to: gh-pages but it is not set in the action it is a default value for the chart-releaser binary)
+          pages_branch: release_management
+          skip_existing: false # Skip package upload if release/tag already exists
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}

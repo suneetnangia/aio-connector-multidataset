@@ -6,7 +6,6 @@
 nameOverride: ""
 fullnameOverride: ""
 
-namespace: azure-iot-operations
 asset:
   name: device-001
   displayName: Device 001

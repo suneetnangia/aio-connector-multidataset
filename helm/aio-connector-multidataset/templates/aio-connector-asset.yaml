@@ -3,7 +3,7 @@ apiVersion: deviceregistry.microsoft.com/v1
 kind: Asset
 metadata:
   name: {{ .Values.asset.name | default "device-001" }}
-  namespace: {{ .Values.namespace | default "azure-iot-operations" }}
+  namespace: {{ default "azure-iot-operations" }}
 spec:
   displayName: {{ .Values.asset.displayName | default "Device 001" }}
   description: {{ .Values.asset.description }}
