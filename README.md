@@ -1,4 +1,4 @@
-# AIO Data Distribution Service (DDS) Connector
+# AIO Multi-Dataset REST Connector
 
 This repo provides the REST protocol connector for Azure IoT Operations (AIO) product.
 
