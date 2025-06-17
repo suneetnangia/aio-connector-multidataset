@@ -13,7 +13,7 @@ After deploying the chart, the [Akri](https://docs.akri.sh/) operator creates a 
 
 The default values are set in `values.yaml` file. This can be overriden by providing a new values file when running [`helm install`](https://helm.sh/docs/helm/helm_install/#helm-install). Alternatively, the values can be provided separately in the command.
 
-The custom datasets with datapoints should be provided as a YAML file. See `sample-datasets.yaml` for an example. The YAML file should not begin with `---` (three dashes) as it is directly injected inline to the asset template of this chart. To include the datasets YAML file during installation, use `--set-file` flag with [`helm install`](https://helm.sh/docs/helm/helm_install/#helm-install) command.
+The custom datasets with datapoints should be provided as a YAML file. See [`sample-datasets.yaml`](https://github.com/suneetnangia/aio-connector-multidataset/blob/main/helm/aio-connector-multidataset/sample-datasets.yaml) for an example. The YAML file should not begin with `---` (three dashes) as it is directly injected inline to the asset template of this chart. To include the datasets YAML file during installation, use `--set-file` flag with [`helm install`](https://helm.sh/docs/helm/helm_install/#helm-install) command.
 
 > **Note**
 >
