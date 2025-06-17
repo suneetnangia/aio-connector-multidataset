@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy the project files to the container
 COPY . .
 
+# Clear NuGet cache to prevent corrupted package issues
+RUN dotnet nuget locals all --clear
+
 # Build the project
 RUN dotnet build Aio.Multidataset.Rest.Connector/Aio.Multidataset.Rest.Connector.csproj -c Release -o out
 
