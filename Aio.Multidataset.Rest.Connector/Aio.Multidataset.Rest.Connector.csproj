@@ -5,21 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-  </PropertyGroup>  
-  <ItemGroup>
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
-  </ItemGroup>
-  
-  <ItemGroup>
-      <Reference Include="Azure.Iot.Operations.Connector" Version="0.10.0">        
-      </Reference>
-      <Reference Include="Azure.Iot.Operations.Mqtt" Version="0.10.0">        
-      </Reference>
-      <Reference Include="Azure.Iot.Operations.Protocol"  Version="0.10.0">        
-      </Reference>
-      <Reference Include="Azure.Iot.Operations.Services"  Version="0.10.0">        
-      </Reference>
-  </ItemGroup>
+  </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Azure.Iot.Operations.Connector" Version="0.10.1" />
+    <PackageReference Include="Azure.Iot.Operations.Mqtt" Version="0.10.1" />
+    <PackageReference Include="Azure.Iot.Operations.Protocol" Version="0.11.0" />
+    <PackageReference Include="Azure.Iot.Operations.Services" Version="0.11.0" />
+  </ItemGroup>
 </Project>
