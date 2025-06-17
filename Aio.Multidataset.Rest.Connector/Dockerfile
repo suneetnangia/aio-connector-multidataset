@@ -11,7 +11,7 @@ COPY . .
 RUN dotnet nuget locals all --clear
 
 # Add the Azure DevOps NuGet source for the IoT Operations packages
-RUN dotnet nuget add source https://pkgs.dev.azure.com/azure-iot-sdks/iot-operations/_packaging/preview/nuget/v3/index.json --name "Azure IoT Operations"
+RUN dotnet add Aio.Multidataset.Rest.Connector/Aio.Multidataset.Rest.Connector.csproj package Azure.IoT.Operations.Connector --source https://pkgs.dev.azure.com/azure-iot-sdks/iot-operations/_packaging/preview/nuget/v3/index.json
 
 # Restore dependencies
 RUN dotnet restore Aio.Multidataset.Rest.Connector/Aio.Multidataset.Rest.Connector.csproj
