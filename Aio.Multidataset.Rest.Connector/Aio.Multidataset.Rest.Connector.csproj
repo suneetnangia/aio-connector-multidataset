@@ -1,30 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>    
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
-
   <ItemGroup>
-
-  </ItemGroup>
-
-    <ItemGroup>
-    <None Update="rtps.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>  
-  </ItemGroup>
-
-    <ItemGroup>   
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Azure.IoT.Operations.Connector" Version="0.10.1" />
       <PackageReference Include="Azure.IoT.Operations.Mqtt" Version="0.10.1" />
       <PackageReference Include="Azure.IoT.Operations.Protocol" Version="0.11.0" />
       <PackageReference Include="Azure.IoT.Operations.Services" Version="0.11.0" />
-    </ItemGroup>
+  </ItemGroup>
 
 </Project>
