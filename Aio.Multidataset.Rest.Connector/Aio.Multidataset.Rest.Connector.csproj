@@ -12,17 +12,13 @@
   </ItemGroup>
   
   <ItemGroup>
-      <Reference Include="Azure.Iot.Operations.Connector">
-        <HintPath>libs\Azure.Iot.Operations.Connector.dll</HintPath>
+      <Reference Include="Azure.Iot.Operations.Connector" Version="0.10.0">        
       </Reference>
-      <Reference Include="Azure.Iot.Operations.Mqtt">
-        <HintPath>libs\Azure.Iot.Operations.Mqtt.dll</HintPath>
+      <Reference Include="Azure.Iot.Operations.Mqtt" Version="0.10.0">        
       </Reference>
-      <Reference Include="Azure.Iot.Operations.Protocol">
-        <HintPath>libs\Azure.Iot.Operations.Protocol.dll</HintPath>
+      <Reference Include="Azure.Iot.Operations.Protocol"  Version="0.10.0">        
       </Reference>
-      <Reference Include="Azure.Iot.Operations.Services">
-        <HintPath>libs\Azure.Iot.Operations.Services.dll</HintPath>
+      <Reference Include="Azure.Iot.Operations.Services"  Version="0.10.0">        
       </Reference>
   </ItemGroup>
 
