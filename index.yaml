@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  aio-connector-multidataset:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-06-17T12:04:15.752829837Z"
+    description: A Helm chart for Kubernetes
+    digest: eeab8cc4e74a2720d710c7be21e66f1917af889764809c165f07686787b174d1
+    name: aio-connector-multidataset
+    type: application
+    urls:
+    - aio-connector-multidataset-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-06-17T12:04:15.752839114Z"
