@@ -18,10 +18,11 @@ assetEndpointProfile:
 replicas: 1
 
 # Container image details for the connector application
+# The image reference used is of form {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
-  repository: suneetnangia/aio-dds-connector
+  repository: ghcr.io/suneetnangia/aio-connector-multidataset
   pullPolicy: Always
-  tag: v0.8
+  tag: main
 
 # This is for the secrets for pulling an image from a private repository more information can be found here:
 # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
