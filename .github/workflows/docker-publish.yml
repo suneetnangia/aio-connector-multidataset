@@ -87,7 +87,7 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         with:        
           # The charts directory
-          charts_dir: helm/aio-connector-multidataset
+          charts_dir: helm
           # Mark the created GitHub release as 'latest'
           mark_as_latest: true
           # Skip package upload if release/tag already exists
