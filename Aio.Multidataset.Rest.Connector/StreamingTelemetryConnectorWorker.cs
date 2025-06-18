@@ -2,24 +2,23 @@
 // Licensed under the MIT License.
 
 using Azure.Iot.Operations.Protocol;
-using Azure.Iot.Operations.Services.Assets;
-using System.Text.Json;
+using Azure.Iot.Operations.Services.AssetAndDeviceRegistry.Models;
 
 namespace Azure.Iot.Operations.Connector
 {
-    public class StreamingTelemetryConnectorWorker : TelemetryConnectorWorker
+    public class StreamingTelemetryConnectorWorker : PollingTelemetryConnectorWorker
     {
         private readonly Dictionary<string, Dictionary<string, (Task, CancellationTokenSource)>> _assetsSamplingTasks = new();
         private readonly IDatasetSamplerFactory _datasetSamplerFactory;
 
-        public StreamingTelemetryConnectorWorker(ApplicationContext applicationContext, ILogger<StreamingTelemetryConnectorWorker> logger, IMqttClient mqttClient, IDatasetSamplerFactory datasetSamplerFactory, IMessageSchemaProvider messageSchemaFactory, IAssetMonitor assetMonitor) : base(applicationContext, logger, mqttClient, messageSchemaFactory, assetMonitor)
+        public StreamingTelemetryConnectorWorker(ApplicationContext applicationContext, ILogger<StreamingTelemetryConnectorWorker> logger, IMqttClient mqttClient, IDatasetSamplerFactory datasetSamplerFactory, IMessageSchemaProvider messageSchemaProvider, IAdrClientWrapper adrClientWrapper, IConnectorLeaderElectionConfigurationProvider? leaderElectionConfigurationProvider = null) : base(applicationContext, logger, mqttClient, datasetSamplerFactory, messageSchemaProvider, adrClientWrapper, leaderElectionConfigurationProvider)
         {
             base.OnAssetAvailable += OnAssetSampleableAsync;
             base.OnAssetUnavailable += OnAssetNotSampleableAsync;
             _datasetSamplerFactory = datasetSamplerFactory;
         }
 
-        public void OnAssetNotSampleableAsync(object? sender, AssetUnavailableEventArgs args)
+        public new void OnAssetNotSampleableAsync(object? sender, AssetUnavailableEventArgs args)
         {
             if (_assetsSamplingTasks.Remove(args.AssetName, out Dictionary<string, (Task, CancellationTokenSource)>? datasetTimers) && datasetTimers != null)
             {
@@ -35,7 +34,7 @@ namespace Azure.Iot.Operations.Connector
             }
         }
 
-        public void OnAssetSampleableAsync(object? sender, AssetAvailabileEventArgs args)
+        public new void OnAssetSampleableAsync(object? sender, AssetAvailableEventArgs args)
         {
             try
             {
@@ -65,11 +64,17 @@ namespace Azure.Iot.Operations.Connector
                     _assetsSamplingTasks.Remove(args.AssetName);
                 }
 
-            _assetsSamplingTasks[args.AssetName] = new Dictionary<string, (Task, CancellationTokenSource)>();
-
-            foreach (Dataset dataset in args.Asset.Datasets)
+            _assetsSamplingTasks[args.AssetName] = new Dictionary<string, (Task, CancellationTokenSource)>();            foreach (var dataset in args.Asset.Datasets)
             {
-                IDatasetSampler datasetSampler = _datasetSamplerFactory.CreateDatasetSampler(AssetEndpointProfile!, args.Asset, dataset);
+                // Use the factory method with the available parameters for the older API
+                IDatasetSampler datasetSampler = _datasetSamplerFactory.CreateDatasetSampler(
+                    device: new Device(), // Pass empty device for now
+                    inboundEndpointName: string.Empty,
+                    assetName: args.AssetName,
+                    asset: args.Asset,
+                    dataset: dataset,
+                    endpointCredentials: null
+                );
                 _logger.LogInformation("Dataset with name {0} in asset with name {1} will be sampled", dataset.Name, args.AssetName);
 
                 // Create a timer that will start a long running timer for continuous sampling by data sampler.                

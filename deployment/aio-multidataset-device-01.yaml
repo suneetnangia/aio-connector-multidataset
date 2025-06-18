@@ -1,0 +1,18 @@
+apiVersion: namespaces.deviceregistry.microsoft.com/v1beta1
+kind: Device
+metadata:
+  name: device-001
+  namespace: azure-iot-operations
+spec:
+  attributes:
+    deviceId: device-001
+    deviceType: device-type-001
+  enabled: true
+  endpoints:
+    inbound:
+      device-001-endpoint:
+        additionalConfiguration: '{}'
+        address: https://11.0.0.4:443        
+        endpointType: device-endpoint-type-001
+  uuid: 1234-5678-9012-3456
+  version: 2

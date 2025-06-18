@@ -28,25 +28,18 @@ build_container:
 	dotnet publish Aio.Multidataset.Rest.Connector/Aio.Multidataset.Rest.Connector.csproj /t:PublishContainer /p:ContainerImageTag=latest
 
 publish_container: build_container
-	docker tag aio-dds-connector:latest $(CONNECTOR_DOCKER_IMAGE_TAG)
+	docker tag aio-multidataset-rest-connector:latest $(CONNECTOR_DOCKER_IMAGE_TAG)
 	docker push $(CONNECTOR_DOCKER_IMAGE_TAG)
 
 deploy: publish_container
-	kubectl apply -f deployment/aio-dds-connector-config.yaml
-	kubectl apply -f deployment/aio-dds-connector-aep-creds.yaml
-	./deployment/aio-dds-connector-aep.sh
-	./deployment/aio-dds-connector-asset-01.sh
-	# kubectl apply -f deployment/aio-dds-connector-asset-01.yaml
+	kubectl apply -f deployment/aio-multidataset-asset-01.yaml
+	kubectl apply -f deployment/aio-multidataset-connector-template.yaml
+	kubectl apply -f deployment/aio-multidataset-device-01.yaml	
 
 clean_deploy:
-	# TODO: clean up the deployment completely i.e. asset and aep resources as well.
-	kubectl delete -f deployment/aio-dds-connector-config.yaml
-	kubectl delete -f deployment/aio-dds-connector-aep-creds.yaml
-	kubectl delete assets device-001 -n azure-iot-operations
-	kubectl delete assetendpointprofile device-001 -n azure-iot-operations
-	kubectl scale deployment device-001-deployment --replicas 0 -n azure-iot-operations
-	sleep 5
-	kubectl delete deployment device-001-deployment -n azure-iot-operations
+	kubectl delete -f deployment/aio-multidataset-device-01.yaml
+	kubectl delete -f deployment/aio-multidataset-asset-01.yaml		
+	kubectl delete -f deployment/aio-multidataset-connector-template.yaml
 
 redeploy: clean_deploy deploy
 

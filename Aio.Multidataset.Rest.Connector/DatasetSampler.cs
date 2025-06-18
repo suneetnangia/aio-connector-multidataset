@@ -1,7 +1,7 @@
 namespace Aio.Multidataset.Rest.Connector;
 
 using Azure.Iot.Operations.Connector;
-using Azure.Iot.Operations.Services.Assets;
+using Azure.Iot.Operations.Services.AssetAndDeviceRegistry.Models;
 using System.Text;
 using System.Text.Json;
 
@@ -9,24 +9,29 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 {
     private readonly ILogger<DatasetSampler> _logger;
     private readonly string _assetName;
-    private readonly AssetEndpointProfileCredentials? _credentials;
     private readonly string? _targetAddress;
     private readonly HttpClient _httpClient;
 
-    public DatasetSampler(ILogger<DatasetSampler> logger, string assetName, AssetEndpointProfileCredentials? credentials, string? targetAddress)
+    public DatasetSampler(ILogger<DatasetSampler> logger, string assetName, string? targetAddress)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         logger.LogInformation("Instantiating Data Sampler Instance {0}", this.GetHashCode());
 
-        _assetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
-        _credentials = credentials;
+        _assetName = assetName ?? throw new ArgumentNullException(nameof(assetName));        
         _targetAddress = targetAddress;
         _httpClient = new HttpClient();
     }
 
-    public async Task<byte[]> SampleDatasetAsync(Dataset dataset, CancellationToken cancellationToken = default)
+    public ValueTask DisposeAsync()
     {
-        try
+        Console.WriteLine("Shutting down Dataset Sampler.");
+        _httpClient?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    public async Task<byte[]> SampleDatasetAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
+    {
+         try
         {
             _logger.LogInformation("Initiating sampling of dataset with name {0} in asset with name {1}", dataset.Name, _assetName);
 
@@ -36,8 +41,8 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             }
 
             // Get the data source URL from the DataPointConfiguration.
-            var currentAmbientTemperatureDataPoint = dataset.DataPointsDictionary!["currentAmbientTemperature"];
-            var dataSourceUrl = currentAmbientTemperatureDataPoint.DataSource!;
+            var dataPointElements = dataset.DataPointsDictionary!["genericDataPoint"];
+            var dataSourceUrl = dataPointElements.DataSource!;
 
             _logger.LogInformation("Fetching data from HTTP endpoint: {0}", dataSourceUrl);
 
@@ -92,12 +97,40 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
         {
             throw new InvalidOperationException($"Failed to sample dataset with name {dataset.Name} in asset with name {_assetName}", ex);
         }
-    }
-
-    public ValueTask DisposeAsync()
+    }    public Task<TimeSpan> GetSamplingIntervalAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("Shutting down DDS DatasetSampler.");
-        _httpClient?.Dispose();
-        return ValueTask.CompletedTask;
+        try
+        {
+            _logger.LogInformation("Fetching sampling interval for dataset with name {0} in asset with name {1}", dataset.Name, _assetName);
+            
+            // Parse the DataPointConfiguration JSON to extract samplingInterval
+            var dataPointConfig = dataset.DataPointsDictionary?["genericDataPoint"]?.DataPointConfiguration;
+            int samplingIntervalMs = 5000; // Default to 5 seconds if not found
+            
+            if (dataPointConfig != null)
+            {
+                try
+                {
+                    var rootElement = dataPointConfig.RootElement;
+                    if (rootElement.TryGetProperty("samplingInterval", out var samplingIntervalProperty))
+                    {
+                        samplingIntervalMs = samplingIntervalProperty.GetInt32();
+                    }
+                }
+                catch (Exception jsonEx)
+                {
+                    _logger.LogWarning(jsonEx, "Failed to parse DataPointConfiguration JSON, using default sampling interval");
+                }
+            }
+            
+            var samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
+            _logger.LogInformation("Sampling interval for dataset {0} is {1} seconds", dataset.Name, samplingInterval.TotalSeconds);
+
+            return Task.FromResult(samplingInterval);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to get sampling interval for dataset with name {dataset.Name} in asset with name {_assetName}", ex);
+        }
     }
 }

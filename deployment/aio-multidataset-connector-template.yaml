@@ -1,0 +1,32 @@
+# The Akri operator will use the connector config to deploy your connector as a Kubernetes pod when a matching AEP has been created on the cluster.
+# Documentation https://github.com/Azure/azure-iot-operations-preview/blob/main/preview/akri-connectors/docs/akri-configurations.md#connector-configuration
+apiVersion: akri.microsoft.com/v1beta1
+kind: ConnectorTemplate
+metadata:
+  name: aio-multidataset-connector-config
+  namespace: azure-iot-operations
+spec:
+   version: "0.0.1"
+   deviceInboundEndpointTypes:
+   - endpointType: device-endpoint-type-001
+     version: "0.0.1"
+   runtimeConfiguration:
+     runtimeConfigurationType: managedConfiguration
+     managedConfigurationSettings:
+      managedConfigurationType: imageConfiguration
+      imageConfigurationSettings:
+        imageName: "suneetnangia/aio-connector-multidataset"
+        imagePullPolicy: Always # This sample image is built locally, so no need to pull
+        replicas: 1
+        tagDigestSettings:
+          tagDigestType: tag
+          tag: "v0.10"
+   mqttConnectionConfiguration:
+     host: "aio-broker:18883"
+     authentication:
+      method: ServiceAccountToken
+      serviceAccountTokenSettings:
+        audience: aio-internal
+     tls:
+       mode: Enabled
+       trustedCaCertificateConfigMapRef: azure-iot-operations-aio-ca-trust-bundle

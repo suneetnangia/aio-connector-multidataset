@@ -1,0 +1,40 @@
+apiVersion: namespaces.deviceregistry.microsoft.com/v1beta1
+kind: Asset
+metadata:
+  name: device-001
+  namespace: azure-iot-operations
+spec:
+  #attributes: # This part of the spec is currently broken in the operator. Re-enable later
+    #assetId: my-rest-thermostat-asset1
+    #assetType: rest-thermostat-asset
+  datasets:
+    - name: thermodynamics
+      dataPoints:
+        - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
+          name: genericDataPoint
+          dataPointConfiguration: |-
+           {
+               "samplingInterval": 5000
+           }
+      dataSource: /thermostat
+      destinations:
+        - configuration:
+            topic: azure-iot-operations/data/device-001/currentAmbientTemperature
+          target: Mqtt
+    - name: pneumatics
+      dataPoints:
+        - dataSource: /piwebapi/assetdatabases/F1RDCf1onAl8tkuTYgE2NfIPFQNp0AsaE7302XMsysUw2j2gQVZFVkFQSVxERUZBVUxUVVNFUkRC/elements
+          name: genericDataPoint
+          dataPointConfiguration: |-
+           {
+               "samplingInterval": 1000
+           }
+      dataSource: /thermostat
+      destinations:
+        - configuration:
+            topic: azure-iot-operations/data/device-001/currentAmbientPressure
+          target: Mqtt
+  deviceRef:
+    deviceName: device-001
+    endpointName: device-001-endpoint
+  version: 1
