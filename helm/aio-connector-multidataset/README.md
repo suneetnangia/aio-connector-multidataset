@@ -2,12 +2,10 @@
 
 This chart creates the following resources in your cluster:
 
-* The asset - the thing to monitor and collect data from
-* [The asset endpoint](https://learn.microsoft.com/azure/iot-operations/discover-manage-assets/concept-assets-asset-endpoints#asset-endpoints)
-* The connector config, which e.g., defines the container image to deploy to handle the incoming data
-* Credentials for the asset, used by the endpoint
+* The asset and the device - the thing to monitor and collect data from
+* The connector template, which e.g., defines the container image to deploy to handle the incoming data
 
-After deploying the chart, the [Akri](https://docs.akri.sh/) operator creates a pod using the container image reference of the connector config.
+After deploying the chart, the [Akri](https://docs.akri.sh/) operator creates a pod using the container image reference of the connector template.
 
 ## Configuration
 

@@ -6,22 +6,22 @@
 nameOverride: ""
 fullnameOverride: ""
 
-asset:
-  name: device-001
-  displayName: Device 001
-  description: Device 001 with REST protocol endpoint
-  defaultDatasetsSamplingInterval: 2000
-assetEndpointProfile:
+device:
+  id: device-001
+  name: device-001 # Also asset name
   type: device-type-001
-  targetAddress: https://11.0.0.4:443
+  inboundEndpoint:
+    name: device-001-endpoint
+    type: device-endpoint-type-001
+    address: https://11.0.0.4:443
 
 replicas: 1
 
 # Container image details for the connector application
+# Pull policy is fixed to "Always"
 # The image reference used is of form {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
-  repository: ghcr.io/suneetnangia/aio-connector-multidataset
-  pullPolicy: Always
+  name: ghcr.io/suneetnangia/aio-connector-multidataset
   tag: main
 
 # This is for the secrets for pulling an image from a private repository more information can be found here:
