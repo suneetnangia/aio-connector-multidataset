@@ -81,7 +81,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             var jsonResponse = new
             {
                 dataSource = dataSourceUrl,
-                data = Regex.Unescape(responseContent),
+                data = responseContent,
                 timestamp = DateTimeOffset.UtcNow.ToString("o")
             };
 
