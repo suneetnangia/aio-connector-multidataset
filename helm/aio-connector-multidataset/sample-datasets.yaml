@@ -12,6 +12,12 @@ datasets:
           {
               "samplingInterval": 5000
           }
+      - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
+        name: verySpecificDataPoint
+        dataPointConfiguration: |-
+          {
+              "samplingInterval": 5000
+          }
   - name: pneumatics
     dataSource: /thermostat
     destinations:
@@ -24,10 +30,4 @@ datasets:
         dataPointConfiguration: |-
           {
               "samplingInterval": 1000
-          }
-      - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
-        name: verySpecificDataPoint
-        dataPointConfiguration: |-
-          {
-              "samplingInterval": 6000
           }

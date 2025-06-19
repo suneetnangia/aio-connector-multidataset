@@ -34,10 +34,10 @@ namespace Aio.Multidataset.Rest.Connector
 
             if (success == null || success == false || inboundEndpoint == null)
             {
-                throw new InvalidOperationException("Failed to get the device inbound endpoint");
+                throw new InvalidOperationException($"Failed to get the device inbound endpoint for asset \"{assetName}\"");
             }
 
-            Console.WriteLine($"Creating DatasetSampler for asset '{assetName}' with endpoint '{inboundEndpointName}', target address '{inboundEndpoint.Address}' and dataset '{dataset.Name}'");
+            Console.WriteLine($"Creating DatasetSampler for asset \"{assetName}\" with endpoint \"{inboundEndpointName}\", target address \"{inboundEndpoint.Address}\" and dataset \"{dataset.Name}\"");
 
             // Create a logger using a simple factory pattern
             var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());

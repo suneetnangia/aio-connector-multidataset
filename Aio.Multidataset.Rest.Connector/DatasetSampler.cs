@@ -132,7 +132,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
         }
 
         var samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
-        _logger.LogInformation("Sampling interval for dataset \"{datasetName}\" set to {samplingInterval} seconds", dataset.Name, samplingInterval.TotalSeconds);
+        _logger.LogInformation("Sampling interval for dataset \"{datasetName}\" set to {samplingInterval} second(s)", dataset.Name, samplingInterval.TotalSeconds);
         return Task.FromResult(samplingInterval);
     }
 
