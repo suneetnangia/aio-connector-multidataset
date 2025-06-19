@@ -25,13 +25,14 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
     public async Task<byte[]> SampleDatasetAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Initiating sampling of dataset with name {datasetName} in asset with name {assetName}", dataset.Name, _assetName);
+        _logger.LogInformation("Initiating sampling of dataset \"{datasetName}\" in asset \"{assetName}\"", dataset.Name, _assetName);
 
         if (dataset.DataPointsDictionary == null)
         {
-            throw new InvalidOperationException($"Dataset with name {dataset.Name} in asset with name {_assetName} has no data points");
+            throw new InvalidOperationException($"Dataset \"{dataset.Name}\" in asset \"{_assetName}\" has no data points");
         }
 
+        _logger.LogDebug("SampleDatasetAsync: Dataset \"{datasetName}\" has data points: {dataPoints}", dataset.Name, dataset.DataPointsDictionary.Keys);
         Dictionary<string, string> sampledData = [];
 
         foreach (string key in dataset.DataPointsDictionary.Keys)
@@ -41,7 +42,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
             if (string.IsNullOrEmpty(dataSource))
             {
-                _logger.LogWarning("Data point {dataPointName} in dataset {datasetName} does not have data source", key, dataset.Name);
+                _logger.LogWarning("Data point \"{dataPointName}\" in dataset \"{datasetName}\" does not have data source", key, dataset.Name);
                 continue;
             }
 
@@ -54,7 +55,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
             using var secureHttpClient = new HttpClient(handler);
 
-            _logger.LogInformation("Fetching data for data point {dataPointName} in dataset {datasetName} from source {dataSource}", key, dataset.Name, dataSourceUrl);
+            _logger.LogInformation("Fetching data for data point \"{dataPointName}\" in dataset \"{datasetName}\" from source \"{dataSource}\"", key, dataset.Name, dataSourceUrl);
             string responseContent;
 
             try
@@ -62,12 +63,12 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
                 HttpResponseMessage response = await secureHttpClient.GetAsync(dataSourceUrl, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogInformation("Received data for data point {dataPointName} in dataset {datasetName}", key, dataset.Name);
+                _logger.LogInformation("Received data for data point \"{dataPointName}\" in dataset \"{datasetName}\": {data}", key, dataset.Name, responseContent);
             }
             catch (Exception e)
             {
-                _logger.LogError("Failed to fetch data for data point {dataPointName} in dataset {datasetName} from source {dataSource}: {errorMessage}", key, dataset.Name, dataSourceUrl, e.Message);
-                responseContent = $"{{\"error\": \"Failed to fetch data from {dataSourceUrl}\", \"message\": \"{e.Message}\"}}";
+                _logger.LogError(e, "Failed to fetch data for data point \"{dataPointName}\" in dataset \"{datasetName}\" from source \"{dataSource}\": {errorMessage}", key, dataset.Name, dataSourceUrl, e.Message);
+                responseContent = $"{{\"error\": \"Failed to fetch data from source {dataSourceUrl}\", \"message\": \"{e.Message}\"}}";
             }
 
             var jsonResponse = new
@@ -83,7 +84,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             }
             catch (NotSupportedException e)
             {
-                _logger.LogError("Failed to serialize response {responseContent}: {errorMessage}", responseContent, e.Message);
+                _logger.LogError(e, "Failed to serialize response {responseContent}: {errorMessage}", responseContent, e.Message);
             }
         }
 
@@ -92,41 +93,47 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
         return Encoding.UTF8.GetBytes(jsonString);
     }
 
+    /// <summary>
+    /// Gets the sampling interval for the given <see cref="AssetDataset"/>.
+    /// Note that the dataset can only have one sampling interval for all of its data points.
+    /// </summary>
+    /// <param name="dataset"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException">Thrown, if the dataset has no data points.</exception>
     public Task<TimeSpan> GetSamplingIntervalAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
     {
-        try
+        _logger.LogInformation("Fetching sampling interval for dataset \"{datasetName}\" in asset \"{assetName}\"", dataset.Name, _assetName);
+
+        if (dataset.DataPointsDictionary == null || dataset.DataPointsDictionary.Count == 0)
         {
-            _logger.LogInformation("Fetching sampling interval for dataset with name {datasetName} in asset with name {assetName}", dataset.Name, _assetName);
+            throw new InvalidOperationException($"Dataset \"{dataset.Name}\" in asset \"{_assetName}\" has no data points");
+        }
 
-            // Parse the DataPointConfiguration JSON to extract samplingInterval
-            var dataPointConfig = dataset.DataPointsDictionary?["genericDataPoint"]?.DataPointConfiguration;
-            int samplingIntervalMs = 5000; // Default to 5 seconds if not found
+        _logger.LogInformation("GetSamplingIntervalAsync: Dataset \"{datasetName}\" has data points: {dataPoints}", dataset.Name, dataset.DataPointsDictionary.Keys);
+        JsonDocument? dataPointConfiguration = dataset.DataPointsDictionary.First().Value.DataPointConfiguration;
+        int samplingIntervalMs = 5000; // Default to 5 seconds if not found
 
-            if (dataPointConfig != null)
+        if (dataPointConfiguration != null)
+        {
+            try
             {
-                try
+                var rootElement = dataPointConfiguration.RootElement;
+
+                if (rootElement.TryGetProperty("samplingInterval", out var samplingIntervalProperty))
                 {
-                    var rootElement = dataPointConfig.RootElement;
-                    if (rootElement.TryGetProperty("samplingInterval", out var samplingIntervalProperty))
-                    {
-                        samplingIntervalMs = samplingIntervalProperty.GetInt32();
-                    }
-                }
-                catch (Exception jsonEx)
-                {
-                    _logger.LogWarning(jsonEx, "Failed to parse DataPointConfiguration JSON, using default sampling interval");
+                    samplingIntervalMs = samplingIntervalProperty.GetInt32();
                 }
             }
-
-            var samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
-            _logger.LogInformation("Sampling interval for dataset {datasetName} is {samplingInterval} seconds", dataset.Name, samplingInterval.TotalSeconds);
-
-            return Task.FromResult(samplingInterval);
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Failed to parse the sampling interval for dataset \"{datasetName}\" (using default sampling interval): {errorMessage}", dataset.Name, e.Message);
+            }
         }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to get sampling interval for dataset with name {dataset.Name} in asset with name {_assetName}", ex);
-        }
+
+        var samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
+        _logger.LogInformation("Sampling interval for dataset \"{datasetName}\" set to {samplingInterval} seconds", dataset.Name, samplingInterval.TotalSeconds);
+        return Task.FromResult(samplingInterval);
     }
 
     public ValueTask DisposeAsync()

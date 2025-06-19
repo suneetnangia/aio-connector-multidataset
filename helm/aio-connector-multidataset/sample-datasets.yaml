@@ -1,5 +1,10 @@
 datasets:
   - name: thermodynamics
+    dataSource: /thermostat
+    destinations:
+      - configuration:
+          topic: azure-iot-operations/data/device-001/currentAmbientTemperature
+        target: Mqtt
     dataPoints:
       - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
         name: genericDataPoint
@@ -7,12 +12,12 @@ datasets:
           {
               "samplingInterval": 5000
           }
+  - name: pneumatics
     dataSource: /thermostat
     destinations:
       - configuration:
-          topic: azure-iot-operations/data/device-001/currentAmbientTemperature
+          topic: azure-iot-operations/data/device-001/currentAmbientPressure
         target: Mqtt
-  - name: pneumatics
     dataPoints:
       - dataSource: /piwebapi/assetdatabases/F1RDCf1onAl8tkuTYgE2NfIPFQNp0AsaE7302XMsysUw2j2gQVZFVkFQSVxERUZBVUxUVVNFUkRC/elements
         name: genericDataPoint
@@ -20,8 +25,9 @@ datasets:
           {
               "samplingInterval": 1000
           }
-    dataSource: /thermostat
-    destinations:
-      - configuration:
-          topic: azure-iot-operations/data/device-001/currentAmbientPressure
-        target: Mqtt
+      - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
+        name: verySpecificDataPoint
+        dataPointConfiguration: |-
+          {
+              "samplingInterval": 6000
+          }
