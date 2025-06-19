@@ -1,0 +1,19 @@
+---
+apiVersion: namespaces.deviceregistry.microsoft.com/v1beta1
+kind: Device
+metadata:
+  name: {{ .Values.device.name | default "device-001" }}
+  namespace: {{ default "azure-iot-operations" }}
+spec:
+  attributes:
+    deviceId: {{ .Values.device.id | default "device-001" }}
+    deviceType: {{ .Values.device.type | default "device-type-001" }}
+  enabled: true
+  endpoints:
+    inbound:
+      '{{ .Values.device.id | default "device-001" }}-endpoint':
+        additionalConfiguration: '{}'
+        address: {{ .Values.device.inboundEndpoint.address }}
+        endpointType: {{ .Values.device.inboundEndpoint.type | default "device-endpoint-type-001" }}
+  #uuid: 1234-5678-9012-3456
+  version: 2
