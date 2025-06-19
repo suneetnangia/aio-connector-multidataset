@@ -5,6 +5,7 @@ using Azure.Iot.Operations.Services.AssetAndDeviceRegistry.Models;
 using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 {
@@ -12,6 +13,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     private readonly string _assetName;
     private readonly string _targetAddress;
     private readonly HttpClient _httpClient;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public DatasetSampler(ILogger<DatasetSampler> logger, string assetName, string targetAddress)
     {
@@ -21,6 +23,11 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
         _assetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
         _targetAddress = string.IsNullOrEmpty(targetAddress) ? throw new ArgumentNullException(nameof(targetAddress)) : targetAddress;
         _httpClient = new HttpClient();
+
+        _jsonSerializerOptions = new()
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
     }
 
     public async Task<byte[]> SampleDatasetAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
@@ -74,13 +81,13 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             var jsonResponse = new
             {
                 dataSource = dataSourceUrl,
-                data = responseContent,
+                data = Regex.Unescape(responseContent),
                 timestamp = DateTimeOffset.UtcNow.ToString("o")
             };
 
             try
             {
-                sampledData.Add(key, JsonSerializer.Serialize(jsonResponse));
+                sampledData.Add(key, Regex.Unescape(JsonSerializer.Serialize(jsonResponse)));
             }
             catch (NotSupportedException e)
             {
@@ -88,7 +95,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             }
         }
 
-        string jsonString = JsonSerializer.Serialize(sampledData);
+        string jsonString = Regex.Unescape(JsonSerializer.Serialize(sampledData, _jsonSerializerOptions));
         _logger.LogInformation("Returning sampled data: {jsonString}", jsonString);
         return Encoding.UTF8.GetBytes(jsonString);
     }
