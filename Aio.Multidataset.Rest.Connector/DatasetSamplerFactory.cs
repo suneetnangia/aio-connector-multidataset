@@ -19,12 +19,14 @@ public class DatasetSamplerFactory : IDatasetSamplerFactory
         _datasetSamplerOptions = datasetSamplerOptions;
     }
 
+    /*
 #pragma warning disable CA2211 // Non-constant fields should not be visible
     public static Func<IServiceProvider, ILogger<DatasetSamplerFactory>, IOptions<DatasetSamplerOptions>, IDatasetSamplerFactory> DatasetSourceFactoryProvider = (service, logger, options) => 
 #pragma warning restore CA2211 // Non-constant fields should not be visible
     {
         return new DatasetSamplerFactory(logger, options);
     };
+    */
     
     /// <summary>
     /// Creates a dataset sampler for the given dataset.

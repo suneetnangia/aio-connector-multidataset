@@ -20,12 +20,12 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     public DatasetSampler(ILogger<DatasetSampler> logger, IOptions<DatasetSamplerOptions> dataSamplerOptions, string assetName, string targetAddress)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _dataSamplerOptions = dataSamplerOptions.Value ?? new();
-
-        logger.LogInformation("Instantiating data sampler instance {hashCode}", GetHashCode());
-
+        _dataSamplerOptions = dataSamplerOptions?.Value ?? new();
         _assetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
         _targetAddress = string.IsNullOrEmpty(targetAddress) ? throw new ArgumentNullException(nameof(targetAddress)) : targetAddress;
+
+        logger.LogInformation("Instantiating data sampler instance {hashCode} for asset \"{assetName}\" with target address \"{targetAddress}\" and default sampling interval of {defaultSamplingInterval} ms", GetHashCode(), assetName, targetAddress, _dataSamplerOptions.DefaultSamplingIntervalInMs);
+
         _httpClient = new HttpClient();
 
         _jsonSerializerOptions = new()
@@ -37,7 +37,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     public async Task<byte[]> SampleDatasetAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(dataset);
-        _logger.LogInformation("Initiating sampling of dataset \"{datasetName}\" in asset \"{assetName}\"", dataset.Name, _assetName);
+        _logger.LogDebug("Initiating sampling of dataset \"{datasetName}\" in asset \"{assetName}\"", dataset.Name, _assetName);
 
         if (dataset.DataPointsDictionary == null)
         {

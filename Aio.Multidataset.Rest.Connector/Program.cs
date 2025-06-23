@@ -11,7 +11,8 @@ IHost host = Host.CreateDefaultBuilder(args)
         services.ConfigureOptions<DatasetSamplerConfigureOptions>();
         services.AddSingleton<ApplicationContext>();
         services.AddSingleton(MqttSessionClientFactoryProvider.MqttSessionClientFactory);
-        services.AddSingleton(DatasetSamplerFactory.DatasetSourceFactoryProvider);
+        //services.AddSingleton(DatasetSamplerFactory.DatasetSourceFactoryProvider);
+        services.AddSingleton<IDatasetSamplerFactory, DatasetSamplerFactory>();
         services.AddSingleton(NoMessageSchemaProvider.NoMessageSchemaProviderFactory);
         services.AddSingleton<IAdrClientWrapper>((services) => new AdrClientWrapper(services.GetService<ApplicationContext>()!, services.GetService<IMqttClient>()!, connectorClientId));
         services.AddHostedService<PollingTelemetryConnectorWorker>();
