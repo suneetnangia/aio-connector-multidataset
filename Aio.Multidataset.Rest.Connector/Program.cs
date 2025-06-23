@@ -8,6 +8,7 @@ string connectorClientId = Environment.GetEnvironmentVariable(ConnectorFileMount
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
+        services.ConfigureOptions<DatasetSamplerConfigureOptions>();
         services.AddSingleton<ApplicationContext>();
         services.AddSingleton(MqttSessionClientFactoryProvider.MqttSessionClientFactory);
         services.AddSingleton(DatasetSamplerFactory.DatasetSourceFactoryProvider);

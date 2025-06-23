@@ -3,6 +3,7 @@ namespace Aio.Multidataset.Rest.Connector;
 using Azure.Iot.Operations.Connector;
 using Azure.Iot.Operations.Services.AssetAndDeviceRegistry.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -10,14 +11,17 @@ using System.Text.RegularExpressions;
 internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 {
     private readonly ILogger<DatasetSampler> _logger;
+    private readonly DatasetSamplerOptions _dataSamplerOptions;
     private readonly string _assetName;
     private readonly string _targetAddress;
     private readonly HttpClient _httpClient;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-    public DatasetSampler(ILogger<DatasetSampler> logger, string assetName, string targetAddress)
+    public DatasetSampler(ILogger<DatasetSampler> logger, IOptions<DatasetSamplerOptions> dataSamplerOptions, string assetName, string targetAddress)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _dataSamplerOptions = dataSamplerOptions.Value ?? new();
+
         logger.LogInformation("Instantiating data sampler instance {hashCode}", GetHashCode());
 
         _assetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
@@ -121,7 +125,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
         _logger.LogInformation("GetSamplingIntervalAsync: Dataset \"{datasetName}\" has data points: {dataPoints}", dataset.Name, dataset.DataPointsDictionary.Keys);
         JsonDocument? dataPointConfiguration = dataset.DataPointsDictionary.First().Value.DataPointConfiguration;
-        int samplingIntervalMs = 5000; // Default to 5 seconds if not found, TODO: Move the value to app config
+        int samplingIntervalMs = _dataSamplerOptions.DefaultSamplingIntervalInMs;
 
         if (dataPointConfiguration != null)
         {
