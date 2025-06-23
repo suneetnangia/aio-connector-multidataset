@@ -90,7 +90,6 @@ namespace Azure.Iot.Operations.Connector
                 var cancellationTokenSource = new CancellationTokenSource();
                 var cancellationToken = cancellationTokenSource.Token;
 
-
                 _assetsSamplingTasks[args.AssetName][dataset.Name] = (
                 Task.Run(async () =>
                 {

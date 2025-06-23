@@ -32,6 +32,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
     public async Task<byte[]> SampleDatasetAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(dataset);
         _logger.LogInformation("Initiating sampling of dataset \"{datasetName}\" in asset \"{assetName}\"", dataset.Name, _assetName);
 
         if (dataset.DataPointsDictionary == null)
@@ -55,6 +56,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
             string dataSourceUrl = string.Format("{0}/{1}", _targetAddress.TrimEnd('/'), dataSource.TrimStart('/'));
 
+            // SSL cert verification to be added later
             using var handler = new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
@@ -70,12 +72,12 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
                 HttpResponseMessage response = await secureHttpClient.GetAsync(dataSourceUrl, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogInformation("Received data for data point \"{dataPointName}\" in dataset \"{datasetName}\": {data}", key, dataset.Name, responseContent);
+                _logger.LogDebug("Received data for data point \"{dataPointName}\" in dataset \"{datasetName}\": {data}", key, dataset.Name, responseContent);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to fetch data for data point \"{dataPointName}\" in dataset \"{datasetName}\" from source \"{dataSource}\": {errorMessage}", key, dataset.Name, dataSourceUrl, e.Message);
-                responseContent = $"{{\"error\": \"Failed to fetch data from source {dataSourceUrl}\", \"message\": \"{e.Message}\"}}";
+                responseContent = $"{{\"error\": \"Failed to fetch data from source {dataSourceUrl}\"";
             }
 
             var jsonResponse = new
@@ -96,7 +98,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
         }
 
         string jsonString = Regex.Unescape(JsonSerializer.Serialize(sampledData, _jsonSerializerOptions));
-        _logger.LogInformation("Returning sampled data: {jsonString}", jsonString);
+        _logger.LogDebug("Returning sampled data: {jsonString}", jsonString);
         return Encoding.UTF8.GetBytes(jsonString);
     }
 
@@ -119,7 +121,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
         _logger.LogInformation("GetSamplingIntervalAsync: Dataset \"{datasetName}\" has data points: {dataPoints}", dataset.Name, dataset.DataPointsDictionary.Keys);
         JsonDocument? dataPointConfiguration = dataset.DataPointsDictionary.First().Value.DataPointConfiguration;
-        int samplingIntervalMs = 5000; // Default to 5 seconds if not found
+        int samplingIntervalMs = 5000; // Default to 5 seconds if not found, TODO: Move the value to app config
 
         if (dataPointConfiguration != null)
         {
@@ -146,7 +148,6 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     public ValueTask DisposeAsync()
     {
         _logger.LogInformation("Shutting down data sampler instance {0}", GetHashCode());
-        Console.WriteLine("Shutting down data sampler instance {0}", GetHashCode());
         _httpClient?.Dispose();
         return ValueTask.CompletedTask;
     }

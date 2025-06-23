@@ -8,8 +8,10 @@ using Azure.Iot.Operations.Services.AssetAndDeviceRegistry.Models;
 namespace Aio.Multidataset.Rest.Connector
 {
     public class DatasetSamplerFactory : IDatasetSamplerFactory
-    {   
+    {
+#pragma warning disable CA2211 // Non-constant fields should not be visible
         public static Func<IServiceProvider, IDatasetSamplerFactory> DatasetSourceFactoryProvider = service =>
+#pragma warning restore CA2211 // Non-constant fields should not be visible
         {
             return new DatasetSamplerFactory();
         };
@@ -37,11 +39,11 @@ namespace Aio.Multidataset.Rest.Connector
                 throw new InvalidOperationException($"Failed to get the device inbound endpoint for asset \"{assetName}\"");
             }
 
-            Console.WriteLine($"Creating DatasetSampler for asset \"{assetName}\" with endpoint \"{inboundEndpointName}\", target address \"{inboundEndpoint.Address}\" and dataset \"{dataset.Name}\"");
-
             // Create a logger using a simple factory pattern
             var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
             var logger = loggerFactory.CreateLogger<DatasetSampler>();
+
+            logger.LogInformation("Creating DatasetSampler for asset \"{assetName}\" with endpoint \"{inboundEndpointName}\", target address \"{inboundEndpointAddress}\" and dataset \"{datasetName}\"", assetName, inboundEndpointName, inboundEndpoint.Address, dataset.Name);
 
             // Return a dataset sampler for the provided asset + dataset
             // Use the assetName parameter instead of asset.DisplayName which can be null
