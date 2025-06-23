@@ -147,7 +147,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
-        _logger.LogInformation("Shutting down data sampler instance {0}", GetHashCode());
+        _logger.LogInformation("Shutting down data sampler instance {hashCode}", GetHashCode());
         _httpClient?.Dispose();
         return ValueTask.CompletedTask;
     }
