@@ -77,7 +77,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to fetch data for data point \"{dataPointName}\" in dataset \"{datasetName}\" from source \"{dataSource}\": {errorMessage}", key, dataset.Name, dataSourceUrl, e.Message);
-                responseContent = $"{{\"error\": \"Failed to fetch data from source {dataSourceUrl}\"";
+                responseContent = $"{{\"error\": \"Failed to fetch data from source {dataSourceUrl}\"}}";
             }
 
             var jsonResponse = new
