@@ -2,11 +2,11 @@
 apiVersion: namespaces.deviceregistry.microsoft.com/v1beta1
 kind: Asset
 metadata:
-  name: {{ .Values.device.name | default "device-001" }}
+  name: {{ .Values.assetName }}
   namespace: {{ default "azure-iot-operations" }}
 spec:
   deviceRef:
-    deviceName: {{ .Values.device.name | default "device-001" }}
-    endpointName: {{ .Values.device.inboundEndpoint.name | default "device-001-endpoint" }}
+    deviceName: {{ .Values.assetName }}
+    endpointName: "{{ .Values.assetName }}-endpoint"
   version: 1
   {{ .Values.datasets }}

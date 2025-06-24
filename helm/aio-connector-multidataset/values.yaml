@@ -6,14 +6,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
-device:
-  id: device-001
-  name: device-001 # Also asset name
-  type: device-type-001
-  inboundEndpoint:
-    name: device-001-endpoint
-    type: device-endpoint-type-001
-    address: https://11.0.0.4:443
+assetName: device-001
+deviceInboundEndpointAddress: https://11.0.0.4:443
+mqttConnectionConfigurationHost: aio-broker:18883
 
 replicas: 1
 

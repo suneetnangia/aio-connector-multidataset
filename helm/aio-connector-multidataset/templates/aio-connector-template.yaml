@@ -2,12 +2,12 @@
 apiVersion: akri.microsoft.com/v1beta1
 kind: ConnectorTemplate
 metadata:
-  name: '{{ .Values.device.name | default "device-001" }}-aio-connector-template'
+  name: "{{ .Values.assetName }}-aio-connector-template"
   namespace: {{ default "azure-iot-operations" }}
 spec:
    version: "0.0.1"
    deviceInboundEndpointTypes:
-   - endpointType: {{ .Values.device.inboundEndpoint.type | default "device-endpoint-type-001" }}
+   - endpointType: "{{ .Values.assetName }}-endpoint-type"
      version: "0.0.1"
    runtimeConfiguration:
      runtimeConfigurationType: managedConfiguration
@@ -21,7 +21,7 @@ spec:
           tagDigestType: tag
           tag: {{ .Values.image.tag | default .Chart.AppVersion }}
    mqttConnectionConfiguration:
-     host: "aio-broker:18883"
+     host: {{ .Values.mqttConnectionConfigurationHost }}
      authentication:
       method: ServiceAccountToken
       serviceAccountTokenSettings:
