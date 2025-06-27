@@ -2,7 +2,6 @@ name: Package and release Helm chart
 
 on:
   workflow_dispatch:
-    tags: [ 'v*.*.*' ] # Publish semver tags as releases
 
 env:
   HELM_CHART_DIR: helm
