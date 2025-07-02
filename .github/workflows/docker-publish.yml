@@ -20,7 +20,7 @@ env:
 
 jobs:
   build-package-release:
-
+    name: Build Package Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -37,10 +37,27 @@ jobs:
            git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
            git config --global user.name "$(gh api /users/${GITHUB_ACTOR} | jq .name -r)"
            git config -l
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # https://github.com/PaulHatch/semantic-version
+      - name: Resolve version
+        id: version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR)"
+          minor_pattern: "(MINOR)"
+          version_format: "${major}.${minor}.${patch}-prerelease${increment}"
+          change_path: "Aio.Multidataset.Rest.Connector helm"
+          namespace: "" # Named version, will be used as suffix for name version tag
+          bump_each_commit: true
+          search_commit_body: false
+          enable_prerelease_mode: true
+          version_from_branch: true
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
@@ -80,21 +97,32 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # https://github.com/marketplace/actions/helm-publisher
+      - name: Release Helm chart
+        uses: stefanprodan/helm-gh-pages@v1.7.0
+        with:
+          # The chart app version is used to specify the default container image tag
+          app_version: ${{ steps.meta.outputs.version}}
+          branch: release_management
+          charts_dir: helm
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ steps.version.outputs.version }}
+
       # Release Helm Package
-      - name: Helm Chart Releaser
+      #- name: Helm Chart Releaser
       # You may pin to the exact commit or the version.
       # uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
-        uses: helm/chart-releaser-action@v1.6.0
-        with:        
+      #  uses: helm/chart-releaser-action@v1.6.0
+      #  with:
           # The charts directory
-          charts_dir: helm
+      #    charts_dir: helm
           # Mark the created GitHub release as 'latest'
-          mark_as_latest: true
+      #    mark_as_latest: true
           # Skip package upload if release/tag already exists
-          skip_existing: false
+      #    skip_existing: false
           # Upload chart packages directly into publishing branch
-          packages_with_index: true
+      #    packages_with_index: true
           # Name of the branch to be used to push the index and artifacts. (default to: gh-pages but it is not set in the action it is a default value for the chart-releaser binary)
-          pages_branch: release_management
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      #    pages_branch: release_management
+      #  env:
+      #    CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
