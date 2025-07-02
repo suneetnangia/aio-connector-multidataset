@@ -86,7 +86,6 @@ jobs:
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
-        if: false
         id: build-and-push
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
@@ -100,7 +99,6 @@ jobs:
 
       # https://github.com/marketplace/actions/helm-publisher
       - name: Release Helm chart
-        if: false
         uses: stefanprodan/helm-gh-pages@v1.7.0
         with:
           # The chart app version is used to specify the default container image tag
