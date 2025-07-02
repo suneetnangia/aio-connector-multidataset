@@ -105,8 +105,8 @@ jobs:
           app_version: ${{ steps.version.outputs.version_tag }}
           branch: release_management
           charts_dir: helm
+          chart_version: ${{ steps.version.outputs.version }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: ${{ steps.version.outputs.version }}
 
       # Release Helm Package
       - name: Helm Chart Releaser
