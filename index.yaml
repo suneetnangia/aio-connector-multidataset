@@ -12,6 +12,16 @@ entries:
     - https://suneetnangia.github.io/aio-connector-multidataset/aio-connector-multidataset-0.1.0.tgz
     version: 0.1.0
   - apiVersion: v2
+    appVersion: v0.0.17
+    created: "2025-07-03T10:52:46.102503294Z"
+    description: AIO connector for multidataset applications
+    digest: 120038ca6e04476187f470526fc777f28384d9a91f7a973a79bdda332b915fd6
+    name: aio-connector-multidataset
+    type: application
+    urls:
+    - https://suneetnangia.github.io/aio-connector-multidataset/aio-connector-multidataset-0.0.17-prerelease0.tgz
+    version: 0.0.17-prerelease0
+  - apiVersion: v2
     appVersion: v0.0.16
     created: "2025-07-03T10:41:39.811012472Z"
     description: AIO connector for multidataset applications
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://suneetnangia.github.io/aio-connector-multidataset/aio-connector-multidataset-0.0.16-prerelease0.tgz
     version: 0.0.16-prerelease0
-generated: "2025-07-03T10:41:39.810621841Z"
+generated: "2025-07-03T10:52:46.102116606Z"
