@@ -16,8 +16,8 @@ replicas: 1
 # Pull policy is fixed to "Always"
 # The image reference used is of form {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:
-  name: ghcr.io/suneetnangia/aio-connector-multidataset
-  tag: main
+  repository: ghcr.io/suneetnangia/aio-connector-multidataset
+  tag: "" # Uses Chart.AppVersion when empty
 
 # This is for the secrets for pulling an image from a private repository more information can be found here:
 # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
