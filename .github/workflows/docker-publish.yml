@@ -97,13 +97,28 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # https://github.com/marketplace/actions/helm-publisher
-      - name: Release Helm chart
-        uses: stefanprodan/helm-gh-pages@v1.7.0
+      - name: Inject version into Helm Chart
+        run: |
+          sed -i "s/CHART_VERSION/${{ steps.version.outputs.version }}/g" helm/aio-connector-multidataset/Chart.yaml.tmpl
+          sed -i "s/APP_VERSION/${{ steps.version.outputs.version_tag }}/g" helm/aio-connector-multidataset/Chart.yaml.tmpl
+          cp helm/aio-connector-multidataset/Chart.yaml.tmpl helm/aio-connector-multidataset/Chart.yaml
+          rm helm/aio-connector-multidataset/Chart.yaml.tmpl
+
+      # Release Helm Package
+      - name: Helm Chart Releaser
+      # You may pin to the exact commit or the version.
+      # uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
+        uses: helm/chart-releaser-action@v1.6.0
         with:
-          # The chart app version is used to specify the default container image tag
-          app_version: ${{ steps.version.outputs.version_tag }}
-          branch: release_management
+          # The charts directory
           charts_dir: helm
-          chart_version: ${{ steps.version.outputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Mark the created GitHub release as 'latest'
+          mark_as_latest: true
+          # Skip package upload if release/tag already exists
+          skip_existing: false
+          # Upload chart packages directly into publishing branch
+          packages_with_index: true
+          # Name of the branch to be used to push the index and artifacts. (default to: gh-pages but it is not set in the action it is a default value for the chart-releaser binary)
+          pages_branch: release_management
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
