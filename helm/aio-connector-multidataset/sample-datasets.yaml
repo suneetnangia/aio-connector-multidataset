@@ -3,7 +3,7 @@ datasets:
     dataSource: /thermostat
     datasetConfiguration: |-
       {
-        "samplingInterval": 6000
+        "samplingInterval": 5000
       }
     destinations:
       - configuration:
@@ -12,18 +12,14 @@ datasets:
     dataPoints:
       - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
         name: genericDataPoint
-        dataPointConfiguration: |-
-          {
-            "samplingInterval": 5000
-          }
       - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
         name: verySpecificDataPoint
-        dataPointConfiguration: |-
-          {
-            "samplingInterval": 5000
-          }
   - name: pneumatics
     dataSource: /thermostat
+    datasetConfiguration: |-
+      {
+        "samplingInterval": 10000
+      }
     destinations:
       - configuration:
           topic: azure-iot-operations/data/device-001/currentAmbientPressure
@@ -31,7 +27,3 @@ datasets:
     dataPoints:
       - dataSource: /piwebapi/assetdatabases/F1RDCf1onAl8tkuTYgE2NfIPFQNp0AsaE7302XMsysUw2j2gQVZFVkFQSVxERUZBVUxUVVNFUkRC/elements
         name: genericDataPoint
-        dataPointConfiguration: |-
-          {
-            "samplingInterval": 1000
-          }
