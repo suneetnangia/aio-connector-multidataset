@@ -109,10 +109,15 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     /// <summary>
     /// Gets the sampling interval for the given <see cref="AssetDataset"/>.
     /// Note that the dataset can only have one sampling interval for all of its data points.
+    /// 
+    /// The lookup and fallback chain for the sampling internal is as follows:
+    /// 1. Dataset configuration
+    /// 2. Data point configuration (the first data point seen)
+    /// 3. Default value (app settings, and if not available the hard-coded value)
     /// </summary>
     /// <param name="dataset"></param>
     /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <returns>The dataset sampling interval as <see cref="TimeSpan"/> object.</returns>
     /// <exception cref="InvalidOperationException">Thrown, if the dataset has no data points.</exception>
     public Task<TimeSpan> GetSamplingIntervalAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
     {
@@ -123,15 +128,43 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             throw new InvalidOperationException($"Dataset \"{dataset.Name}\" in asset \"{_assetName}\" has no data points");
         }
 
-        _logger.LogInformation("GetSamplingIntervalAsync: Dataset \"{datasetName}\" has data points: {dataPoints}", dataset.Name, dataset.DataPointsDictionary.Keys);
-        JsonDocument? dataPointConfiguration = dataset.DataPointsDictionary.First().Value.DataPointConfiguration;
         int samplingIntervalMs = _dataSamplerOptions.DefaultSamplingIntervalInMs;
+        TimeSpan samplingInterval;
+
+        if (!string.IsNullOrEmpty(dataset.DatasetConfiguration))
+        {
+            try
+            {
+                using JsonDocument datasetConfigurationDocument = JsonDocument.Parse(dataset.DatasetConfiguration);
+                JsonElement rootElement = datasetConfigurationDocument.RootElement;
+
+                if (rootElement.TryGetProperty("samplingInterval", out var samplingIntervalProperty))
+                {
+                    samplingIntervalMs = samplingIntervalProperty.GetInt32();
+                }
+
+                samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
+                _logger.LogInformation("Sampling interval for dataset \"{datasetName}\" set to {samplingInterval} second(s)", dataset.Name, samplingInterval.TotalSeconds);
+                return Task.FromResult(samplingInterval);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Failed to parse the sampling interval from dataset configuration for dataset \"{datasetName}\", falling back to data point configuration next: {errorMessage}", dataset.Name, e.Message);
+            }
+        }
+        else
+        {
+            _logger.LogWarning("No dataset configuration found for dataset \"{datasetName}\", trying to resolve the sampling interval from data point configuration next", dataset.Name);
+        }
+
+        _logger.LogDebug("GetSamplingIntervalAsync: Dataset \"{datasetName}\" has data points: {dataPoints}", dataset.Name, dataset.DataPointsDictionary.Keys);
+        JsonDocument? dataPointConfiguration = dataset.DataPointsDictionary.First().Value.DataPointConfiguration;
 
         if (dataPointConfiguration != null)
         {
             try
             {
-                var rootElement = dataPointConfiguration.RootElement;
+                JsonElement rootElement = dataPointConfiguration.RootElement;
 
                 if (rootElement.TryGetProperty("samplingInterval", out var samplingIntervalProperty))
                 {
@@ -144,7 +177,7 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             }
         }
 
-        var samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
+        samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
         _logger.LogInformation("Sampling interval for dataset \"{datasetName}\" set to {samplingInterval} second(s)", dataset.Name, samplingInterval.TotalSeconds);
         return Task.FromResult(samplingInterval);
     }

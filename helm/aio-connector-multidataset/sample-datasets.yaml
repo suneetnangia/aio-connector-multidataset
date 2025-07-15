@@ -1,6 +1,10 @@
 datasets:
   - name: thermodynamics
     dataSource: /thermostat
+    datasetConfiguration: |-
+      {
+        "samplingInterval": 6000
+      }
     destinations:
       - configuration:
           topic: azure-iot-operations/data/device-001/currentAmbientTemperature
@@ -10,13 +14,13 @@ datasets:
         name: genericDataPoint
         dataPointConfiguration: |-
           {
-              "samplingInterval": 5000
+            "samplingInterval": 5000
           }
       - dataSource: /piwebapi/assetservers/F1RSCf1onAl8tkuTYgE2NfIPFQQVZFVkFQSQ/assetdatabases
         name: verySpecificDataPoint
         dataPointConfiguration: |-
           {
-              "samplingInterval": 5000
+            "samplingInterval": 5000
           }
   - name: pneumatics
     dataSource: /thermostat
@@ -29,5 +33,5 @@ datasets:
         name: genericDataPoint
         dataPointConfiguration: |-
           {
-              "samplingInterval": 1000
+            "samplingInterval": 1000
           }
