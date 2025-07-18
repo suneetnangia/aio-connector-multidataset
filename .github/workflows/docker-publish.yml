@@ -20,7 +20,7 @@ env:
 
 jobs:
   build-package-release:
-
+    name: Build Package Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -37,10 +37,27 @@ jobs:
            git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
            git config --global user.name "$(gh api /users/${GITHUB_ACTOR} | jq .name -r)"
            git config -l
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # https://github.com/PaulHatch/semantic-version
+      - name: Resolve version
+        id: version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR)"
+          minor_pattern: "(MINOR)"
+          version_format: "${major}.${minor}.${patch}-prerelease${increment}"
+          change_path: "Aio.Multidataset.Rest.Connector helm"
+          namespace: "" # Named version, will be used as suffix for name version tag
+          bump_each_commit: true
+          search_commit_body: false
+          enable_prerelease_mode: true
+          version_from_branch: true
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
@@ -85,17 +102,24 @@ jobs:
           context: .
           file: Aio.Multidataset.Rest.Connector/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version_tag }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Inject version into Helm Chart
+        run: |
+          sed -i "s/CHART_VERSION/${{ steps.version.outputs.version }}/g" helm/aio-connector-multidataset/Chart.yaml.tmpl
+          sed -i "s/APP_VERSION/${{ steps.version.outputs.version_tag }}/g" helm/aio-connector-multidataset/Chart.yaml.tmpl
+          cp helm/aio-connector-multidataset/Chart.yaml.tmpl helm/aio-connector-multidataset/Chart.yaml
+          rm helm/aio-connector-multidataset/Chart.yaml.tmpl
 
       # Release Helm Package
       - name: Helm Chart Releaser
       # You may pin to the exact commit or the version.
       # uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
         uses: helm/chart-releaser-action@v1.6.0
-        with:        
+        with:
           # The charts directory
           charts_dir: helm
           # Mark the created GitHub release as 'latest'

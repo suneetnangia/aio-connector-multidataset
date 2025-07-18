@@ -30,3 +30,25 @@ helm uninstall aio-connector-multidataset --namespace azure-iot-operations
 ```
 
 > The namespace is `azure-iot-operations` by default and can be omitted from the commands above.
+
+## Inspecting CRDs
+
+As of writing this, the connector related custom resource definitions (CRDs) are still being developed and online documentation is slim to none. To inspect the CRD schema e.g., to see how the assets are configured, you can use the `kubectl` tool:
+
+To list all CRDs:
+
+```bash
+kubectl get crd
+```
+
+To list Microsoft specific ones:
+
+```bash
+kubectl get crd | grep microsoft
+```
+
+Once you find the name of the CRD you want to inspect further, you can dump it in a file, for example:
+
+```bash
+kubectl get crd assets.namespaces.deviceregistry.microsoft.com --output yaml > assets.namespaces.deviceregistry.microsoft.com.yaml
+```

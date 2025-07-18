@@ -112,26 +112,22 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
     /// </summary>
     /// <param name="dataset"></param>
     /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException">Thrown, if the dataset has no data points.</exception>
+    /// <returns>The dataset sampling interval as <see cref="TimeSpan"/> object.</returns>
     public Task<TimeSpan> GetSamplingIntervalAsync(AssetDataset dataset, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching sampling interval for dataset \"{datasetName}\" in asset \"{assetName}\"", dataset.Name, _assetName);
-
-        if (dataset.DataPointsDictionary == null || dataset.DataPointsDictionary.Count == 0)
-        {
-            throw new InvalidOperationException($"Dataset \"{dataset.Name}\" in asset \"{_assetName}\" has no data points");
-        }
-
-        _logger.LogInformation("GetSamplingIntervalAsync: Dataset \"{datasetName}\" has data points: {dataPoints}", dataset.Name, dataset.DataPointsDictionary.Keys);
-        JsonDocument? dataPointConfiguration = dataset.DataPointsDictionary.First().Value.DataPointConfiguration;
         int samplingIntervalMs = _dataSamplerOptions.DefaultSamplingIntervalInMs;
 
-        if (dataPointConfiguration != null)
+        if (string.IsNullOrEmpty(dataset.DatasetConfiguration))
+        {
+            _logger.LogWarning("No dataset configuration found for dataset \"{datasetName}\", falling back to default sampling interval", dataset.Name);
+        }
+        else
         {
             try
             {
-                var rootElement = dataPointConfiguration.RootElement;
+                using JsonDocument datasetConfigurationDocument = JsonDocument.Parse(dataset.DatasetConfiguration);
+                JsonElement rootElement = datasetConfigurationDocument.RootElement;
 
                 if (rootElement.TryGetProperty("samplingInterval", out var samplingIntervalProperty))
                 {
@@ -140,11 +136,11 @@ internal class DatasetSampler : IDatasetSampler, IAsyncDisposable
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "Failed to parse the sampling interval for dataset \"{datasetName}\" (using default sampling interval): {errorMessage}", dataset.Name, e.Message);
+                _logger.LogWarning(e, "Failed to parse the sampling interval from dataset configuration for dataset \"{datasetName}\", falling back to default: {errorMessage}", dataset.Name, e.Message);
             }
         }
 
-        var samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
+        TimeSpan samplingInterval = TimeSpan.FromMilliseconds(samplingIntervalMs);
         _logger.LogInformation("Sampling interval for dataset \"{datasetName}\" set to {samplingInterval} second(s)", dataset.Name, samplingInterval.TotalSeconds);
         return Task.FromResult(samplingInterval);
     }
